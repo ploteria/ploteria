@@ -1,0 +1,31 @@
+[package]
+authors = [
+    "Jorge Aparicio <japaricious@gmail.com>",
+    "Brook Heisler <brookheisler@gmail.com>",
+    "Lorinc",
+    "Alice Ryhl <alice@ryhl.io>",
+    "Dylan DPC <dylan.dpc@gmail.com>"
+    ]
+name = "ploteria"
+version = "0.1.0"
+
+description = "Criterion's plotting library"
+repository = "https://github.com/ploteria/ploteria"
+readme = "README.md"
+keywords = ["plotting", "gnuplot", "criterion"]
+categories = ["visualization"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+byteorder = "1"
+cast = "0.2"
+itertools = "0.8"
+
+[dev-dependencies]
+itertools-num = "0.1"
+num-complex = { version = "0.2", default-features = false, features = ["std"] }
+rand = "0.4"
+
+[badges]
+travis-ci = { repository = "bheisler/criterion.rs" }
+appveyor = { repository = "bheisler/criterion.rs", id = "4255ads9ctpupcl2" }
