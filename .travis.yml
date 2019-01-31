@@ -1,0 +1,30 @@
+branches:
+  except:
+  - /.*(.tmp)$/
+
+language: rust
+
+notifications:
+  email:
+    on_success: never
+
+os: linux
+
+rust:
+- stable
+- beta
+
+script:
+- cargo test
+
+matrix:
+  include:
+    - os: linux
+    rust: nightly
+    before_script:
+      - rustup component add rustfmt-preview
+    script:
+      - cargo fmt --all -- --check
+      - cargo test
+
+sudo: false
