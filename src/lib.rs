@@ -13,7 +13,7 @@
 //!
 //! ```
 //! extern crate itertools_num;
-//! extern crate criterion_plot as plot;
+//! extern crate ploteria as plot;
 //!
 //! # use std::fs;
 //! # use std::path::Path;
@@ -26,12 +26,12 @@
 //! # }
 //! let ref xs = linspace::<f64>(-10., 10., 51).collect::<Vec<_>>();
 //!
-//! # fs::create_dir_all(Path::new("target/doc/criterion_plot")).unwrap();
+//! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
 //! #   .set(Font("Helvetica"))
 //! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/criterion_plot/curve.svg")))
+//! #   .set(Output(Path::new("target/doc/ploteria/curve.svg")))
 //! #   .set(Size(1280, 720))
 //!     .configure(Key, |k| {
 //!         k.set(Boxed::Yes)
@@ -81,7 +81,7 @@
 //! ```
 //! extern crate itertools_num;
 //! extern crate rand;
-//! extern crate criterion_plot as plot;
+//! extern crate ploteria as plot;
 //!
 //! # use std::fs;
 //! # use std::path::Path;
@@ -115,12 +115,12 @@
 //! let xs = linspace::<f64>(-4., 4., 13).skip(1).take(11);
 //! let xs = xs.map(|x| x + 0.2 * rng.gen::<f64>() - 0.1);
 //!
-//! # fs::create_dir_all(Path::new("target/doc/criterion_plot")).unwrap();
+//! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
 //! #   .set(Font("Helvetica"))
 //! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/criterion_plot/error_bar.svg")))
+//! #   .set(Output(Path::new("target/doc/ploteria/error_bar.svg")))
 //! #   .set(Size(1280, 720))
 //!     .configure(Axis::BottomX, |a| {
 //!         a.set(TicLabels {
@@ -166,7 +166,7 @@
 //!
 //! ```
 //! extern crate rand;
-//! extern crate criterion_plot as plot;
+//! extern crate ploteria as plot;
 //!
 //! # use std::fs;
 //! # use std::path::Path;
@@ -188,12 +188,12 @@
 //! let m = bm.iter().zip(bh.iter()).map(|(&l, &h)| (h - l) * rng.gen::<f64>() + l)
 //!     .collect::<Vec<_>>();
 //!
-//! # fs::create_dir_all(Path::new("target/doc/criterion_plot")).unwrap();
+//! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
 //! #   .set(Font("Helvetica"))
 //! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/criterion_plot/candlesticks.svg")))
+//! #   .set(Output(Path::new("target/doc/ploteria/candlesticks.svg")))
 //! #   .set(Size(1280, 720))
 //!     .set(BoxWidth(0.2))
 //!     .configure(Axis::BottomX, |a| a.set(Range::Limits(0., 11.)))
@@ -236,7 +236,7 @@
 //! ```
 //! extern crate itertools_num;
 //! extern crate num_complex;
-//! extern crate criterion_plot as plot;
+//! extern crate ploteria as plot;
 //!
 //! # use std::fs;
 //! # use std::path::Path;
@@ -259,12 +259,12 @@
 //! let phase = xs.iter().map(|&x| tf(x).arg() * 180. / PI);
 //! let magnitude = xs.iter().map(|&x| tf(x).norm());
 //!
-//! # fs::create_dir_all(Path::new("target/doc/criterion_plot")).unwrap();
+//! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new().
 //! #   set(Font("Helvetica")).
 //! #   set(FontSize(12.)).
-//! #   set(Output(Path::new("target/doc/criterion_plot/multiaxis.svg"))).
+//! #   set(Output(Path::new("target/doc/ploteria/multiaxis.svg"))).
 //! #   set(Size(1280, 720)).
 //!     set(Title("Frequency response")).
 //!     configure(Axis::BottomX, |a| a.
@@ -313,7 +313,7 @@
 //!
 //! ```
 //! extern crate itertools_num;
-//! extern crate criterion_plot as plot;
+//! extern crate ploteria as plot;
 //!
 //! # use std::fs;
 //! # use std::path::Path;
@@ -335,12 +335,12 @@
 //!     1. / (((x - mu).powi(2) / 2. / sigma.powi(2)).exp() * sigma * (2. * PI).sqrt())
 //! }
 //!
-//! # fs::create_dir_all(Path::new("target/doc/criterion_plot")).unwrap();
+//! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
 //! #   .set(Font("Helvetica"))
 //! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/criterion_plot/filled_curve.svg")))
+//! #   .set(Output(Path::new("target/doc/ploteria/filled_curve.svg")))
 //! #   .set(Size(1280, 720))
 //!     .set(Title("Transparent filled curve"))
 //!     .configure(Axis::BottomX, |a| a.set(Range::Limits(start, end)))
