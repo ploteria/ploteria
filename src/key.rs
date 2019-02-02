@@ -2,8 +2,7 @@
 
 use std::borrow::Cow;
 
-use traits::Set;
-use {Default, Display, Script, Title};
+use {Default, Display, Script};
 
 /// Properties of the key
 #[derive(Clone)]
@@ -43,6 +42,53 @@ impl Properties {
     /// **Note** The key is shown by default
     pub fn show(&mut self) -> &mut Properties {
         self.hidden = false;
+        self
+    }
+
+    /// Should the key be surrounded by a box or not?
+    ///
+    /// **Note** The key is not boxed by default
+    pub fn boxed(&mut self, boxed: bool) -> &mut Properties {
+        self.boxed = boxed;
+        self
+    }
+
+    /// Changes the justification of the text of each entry
+    ///
+    /// **Note** The text is `RightJustified` by default
+    pub fn justification(&mut self, justification: Justification) -> &mut Properties {
+        self.justification = Some(justification);
+        self
+    }
+
+    /// How to order each entry
+    ///
+    /// **Note** The default order is `TextSample`
+    pub fn order(&mut self, order: Order) -> &mut Properties {
+        self.order = Some(order);
+        self
+    }
+
+    /// Selects where to place the key
+    ///
+    /// **Note** By default, the key is placed `Inside(Vertical::Top, Horizontal::Right)`
+    pub fn position(&mut self, position: Position) -> &mut Properties {
+        self.position = Some(position);
+        self
+    }
+
+    /// Changes how the entries of the key are stacked
+    pub fn stacked(&mut self, stacked: Stacked) -> &mut Properties {
+        self.stacked = Some(stacked);
+        self
+    }
+
+    /// Set the title
+    pub fn title<S>(&mut self, title: S) -> &mut Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.title = Some(title.into());
         self
     }
 }
@@ -91,73 +137,7 @@ impl Script for Properties {
         script.push('\n');
         script
     }
-}
 
-impl Set<Boxed> for Properties {
-    /// Select if the key will be surrounded with a box or not
-    ///
-    /// **Note** The key is not boxed by default
-    fn set(&mut self, boxed: Boxed) -> &mut Properties {
-        match boxed {
-            Boxed::No => self.boxed = false,
-            Boxed::Yes => self.boxed = true,
-        }
-
-        self
-    }
-}
-
-impl Set<Justification> for Properties {
-    /// Changes the justification of the text of each entry
-    ///
-    /// **Note** The text is `RightJustified` by default
-    fn set(&mut self, justification: Justification) -> &mut Properties {
-        self.justification = Some(justification);
-        self
-    }
-}
-
-impl Set<Order> for Properties {
-    /// How to order each entry
-    ///
-    /// **Note** The default order is `TextSample`
-    fn set(&mut self, order: Order) -> &mut Properties {
-        self.order = Some(order);
-        self
-    }
-}
-
-impl Set<Position> for Properties {
-    /// Selects where to place the key
-    ///
-    /// **Note** By default, the key is placed `Inside(Vertical::Top, Horizontal::Right)`
-    fn set(&mut self, position: Position) -> &mut Properties {
-        self.position = Some(position);
-        self
-    }
-}
-
-impl Set<Stacked> for Properties {
-    /// Changes how the entries of the key are stacked
-    fn set(&mut self, stacked: Stacked) -> &mut Properties {
-        self.stacked = Some(stacked);
-        self
-    }
-}
-
-impl Set<Title> for Properties {
-    fn set(&mut self, title: Title) -> &mut Properties {
-        self.title = Some(title.0);
-        self
-    }
-}
-
-/// Whether the key is surrounded by a box or not
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub enum Boxed {
-    No,
-    Yes,
 }
 
 /// Horizontal position of the key

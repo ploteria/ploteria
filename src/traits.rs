@@ -27,9 +27,3 @@ pub trait Plot<This> {
     where
         F: FnOnce(&mut Self::Properties) -> &mut Self::Properties;
 }
-
-/// Overloaded `set` method
-pub trait Set<T> {
-    /// Sets some property
-    fn set(&mut self, T) -> &mut Self;
-}

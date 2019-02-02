@@ -4,11 +4,8 @@ use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use data::Matrix;
-use traits::{self, Data, Set};
-use {
-    Axes, Color, CurveDefault, Display, Figure, Label, LineType, LineWidth, Plot, PointSize,
-    PointType, Script,
-};
+use traits::{self, Data};
+use {Axes, Color, CurveDefault, Display, Figure, LineType, Plot, PointType, Script};
 
 /// Properties common to simple "curve" like plots
 pub struct Properties {
@@ -20,6 +17,69 @@ pub struct Properties {
     point_type: Option<PointType>,
     point_size: Option<f64>,
     style: Style,
+}
+
+impl Properties {
+    /// Select the axes to plot against
+    ///
+    /// **Note** By default, the `BottomXLeftY` axes are used
+    pub fn axes(&mut self, axes: Axes) -> &mut Properties {
+        self.axes = Some(axes);
+        self
+    }
+
+    /// Sets the line color
+    pub fn color(&mut self, color: Color) -> &mut Properties {
+        self.color = Some(color);
+        self
+    }
+
+    /// Sets the legend label
+    pub fn label<S>(&mut self, label: S) -> &mut Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Changes the line type
+    ///
+    /// **Note** By default `Solid` lines are used
+    pub fn line_type(&mut self, lt: LineType) -> &mut Properties {
+        self.line_type = lt;
+        self
+    }
+
+    /// Changes the width of the line
+    ///
+    /// # Panics
+    ///
+    /// Panics if `width` is a non-positive value
+    pub fn line_width(&mut self, lw: f64) -> &mut Properties {
+        assert!(lw > 0.);
+
+        self.linewidth = Some(lw);
+        self
+    }
+
+    /// Changes the size of the points
+    ///
+    /// # Panics
+    ///
+    /// Panics if `size` is a non-positive value
+    pub fn point_size(&mut self, ps: f64) -> &mut Properties {
+        assert!(ps > 0.);
+
+        self.point_size = Some(ps);
+        self
+    }
+
+    /// Changes the point type
+    pub fn point_type(&mut self, pt: PointType) -> &mut Properties {
+        self.point_type = Some(pt);
+        self
+    }
 }
 
 impl CurveDefault<Style> for Properties {
@@ -76,81 +136,6 @@ impl Script for Properties {
     }
 }
 
-impl Set<Axes> for Properties {
-    /// Select the axes to plot against
-    ///
-    /// **Note** By default, the `BottomXLeftY` axes are used
-    fn set(&mut self, axes: Axes) -> &mut Properties {
-        self.axes = Some(axes);
-        self
-    }
-}
-
-impl Set<Color> for Properties {
-    /// Sets the line color
-    fn set(&mut self, color: Color) -> &mut Properties {
-        self.color = Some(color);
-        self
-    }
-}
-
-impl Set<Label> for Properties {
-    /// Sets the legend label
-    fn set(&mut self, label: Label) -> &mut Properties {
-        self.label = Some(label.0);
-        self
-    }
-}
-
-impl Set<LineType> for Properties {
-    /// Changes the line type
-    ///
-    /// **Note** By default `Solid` lines are used
-    fn set(&mut self, lt: LineType) -> &mut Properties {
-        self.line_type = lt;
-        self
-    }
-}
-
-impl Set<LineWidth> for Properties {
-    /// Changes the width of the line
-    ///
-    /// # Panics
-    ///
-    /// Panics if `width` is a non-positive value
-    fn set(&mut self, lw: LineWidth) -> &mut Properties {
-        let lw = lw.0;
-
-        assert!(lw > 0.);
-
-        self.linewidth = Some(lw);
-        self
-    }
-}
-
-impl Set<PointSize> for Properties {
-    /// Changes the size of the points
-    ///
-    /// # Panics
-    ///
-    /// Panics if `size` is a non-positive value
-    fn set(&mut self, ps: PointSize) -> &mut Properties {
-        let ps = ps.0;
-
-        assert!(ps > 0.);
-
-        self.point_size = Some(ps);
-        self
-    }
-}
-
-impl Set<PointType> for Properties {
-    /// Changes the point type
-    fn set(&mut self, pt: PointType) -> &mut Properties {
-        self.point_type = Some(pt);
-        self
-    }
-}
 
 /// Types of "curve" plots
 pub enum Curve<X, Y> {
