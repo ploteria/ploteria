@@ -122,7 +122,7 @@
 //! #   .font_size(12.)
 //! #   .output(Path::new("target/doc/ploteria/error_bar.svg"))
 //! #   .figure_size(1280, 720)
-//!     .configure(Axis::BottomX, |a| {
+//!     .configure_axis(Axis::BottomX, |a| {
 //!         a.tick_labels(TicLabels {
 //!             labels: &["-π", "0", "π"],
 //!             positions: &[-PI, 0., PI],
@@ -196,7 +196,7 @@
 //! #   .output(Path::new("target/doc/ploteria/candlesticks.svg"))
 //! #   .figure_size(1280, 720)
 //!     .box_width(0.2)
-//!     .configure(Axis::BottomX, |a| a.range(Range::Limits(0., 11.)))
+//!     .configure_axis(Axis::BottomX, |a| a.range(Range::Limits(0., 11.)))
 //!     .plot(Candlesticks {
 //!               x: xs.clone(),
 //!               whisker_min: &wm,
@@ -267,18 +267,16 @@
 //! #   .output(Path::new("target/doc/ploteria/multiaxis.svg"))
 //! #   .figure_size(1280, 720)
 //!     .title("Frequency response")
-//!     .configure(Axis::BottomX, |a| a
-//!         .configure(Grid::Major, |g| g
-//!             .show())
+//!     .configure_axis(Axis::BottomX, |a| a
+//!         .configure_major_grid(|g| g.show())
 //!         .label("Angular frequency (rad/s)")
 //!         .range(Range::Limits(start, end))
 //!         .scale(Scale::Logarithmic))
-//!     .configure(Axis::LeftY, |a| a
+//!     .configure_axis(Axis::LeftY, |a| a
 //!         .label("Gain")
 //!         .scale(Scale::Logarithmic))
-//!     .configure(Axis::RightY, |a| a
-//!         .configure(Grid::Major, |g| g
-//!             .show())
+//!     .configure_axis(Axis::RightY, |a| a
+//!         .configure_major_grid(|g| g.show())
 //!         .label("Phase shift (°)"))
 //!     .configure(Key, |k| k
 //!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
@@ -343,8 +341,8 @@
 //! #   .output(Path::new("target/doc/ploteria/filled_curve.svg"))
 //! #   .figure_size(1280, 720)
 //!     .title("Transparent filled curve")
-//!     .configure(Axis::BottomX, |a| a.range(Range::Limits(start, end)))
-//!     .configure(Axis::LeftY, |a| a.range(Range::Limits(0., 1.)))
+//!     .configure_axis(Axis::BottomX, |a| a.range(Range::Limits(start, end)))
+//!     .configure_axis(Axis::LeftY, |a| a.range(Range::Limits(0., 1.)))
 //!     .configure(Key, |k| {
 //!         k.justification(Justification::Left)
 //!          .order(Order::SampleText)
@@ -423,16 +421,17 @@ pub mod candlestick;
 pub mod curve;
 pub mod errorbar;
 pub mod filledcurve;
-pub mod grid;
 pub mod key;
 pub mod prelude;
 pub mod traits;
+
+use axis::{Axes, AxisProperties, Axis};
 
 /// Plot container
 #[derive(Clone)]
 pub struct Figure {
     alpha: Option<f64>,
-    axes: map::axis::Map<axis::Properties>,
+    axes: map::axis::Map<axis::AxisProperties>,
     box_width: Option<f64>,
     font: Option<Cow<'static, str>>,
     font_size: Option<f64>,
@@ -651,16 +650,11 @@ impl Figure {
         File::create(path)?.write_all(&self.script())?;
         Ok(self)
     }
-}
 
-impl Configure<Axis> for Figure {
-    type Properties = axis::Properties;
-
-    /// Configures an axis
-    fn configure<F>(&mut self, axis: Axis, configure: F) -> &mut Figure
-    where
-        F: FnOnce(&mut axis::Properties) -> &mut axis::Properties,
-    {
+    /// Configures an axis.
+    pub fn configure_axis<F: FnOnce(&mut AxisProperties) -> &mut AxisProperties>(
+        &mut self, axis: Axis, configure: F
+    ) -> &mut Figure {
         if self.axes.contains_key(axis) {
             configure(self.axes.get_mut(axis).unwrap());
         } else {
@@ -719,42 +713,6 @@ pub struct TicLabels<P, L> {
     pub positions: P,
 }
 
-/// A pair of axes that define a coordinate system
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub enum Axes {
-    BottomXLeftY,
-    BottomXRightY,
-    TopXLeftY,
-    TopXRightY,
-}
-
-/// A coordinate axis
-#[derive(Clone, Copy)]
-pub enum Axis {
-    /// X axis on the bottom side of the figure
-    BottomX,
-    /// Y axis on the left side of the figure
-    LeftY,
-    /// Y axis on the right side of the figure
-    RightY,
-    /// X axis on the top side of the figure
-    TopX,
-}
-
-impl Axis {
-    fn next(self) -> Option<Axis> {
-        use Axis::*;
-
-        match self {
-            BottomX => Some(LeftY),
-            LeftY => Some(RightY),
-            RightY => Some(TopX),
-            TopX => None,
-        }
-    }
-}
-
 /// Color
 #[allow(missing_docs)]
 #[derive(Clone, Copy)]
@@ -773,26 +731,6 @@ pub enum Color {
     Rgb(u8, u8, u8),
     White,
     Yellow,
-}
-
-/// Grid line
-#[derive(Clone, Copy)]
-pub enum Grid {
-    /// Major gridlines
-    Major,
-    /// Minor gridlines
-    Minor,
-}
-
-impl Grid {
-    fn next(self) -> Option<Grid> {
-        use Grid::*;
-
-        match self {
-            Major => Some(Minor),
-            Minor => None,
-        }
-    }
 }
 
 /// Line type
@@ -982,7 +920,7 @@ fn parse_version(version_str: &str) -> Result<Version, Option<ParseIntError>> {
     })
 }
 
-fn scale_factor(map: &map::axis::Map<axis::Properties>, axes: Axes) -> (f64, f64) {
+fn scale_factor(map: &map::axis::Map<AxisProperties>, axes: Axes) -> (f64, f64) {
     use Axes::*;
     use Axis::*;
 

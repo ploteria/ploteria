@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use key::{Horizontal, Justification, Order, Stacked, Vertical};
-use {Axes, Axis, Color, Display, Grid, LineType, PointType, Terminal};
+use {Axes, Axis, Color, Display, LineType, PointType, Terminal};
 
 impl Display<&'static str> for Axis {
     fn display(&self) -> &'static str {
@@ -41,15 +41,6 @@ impl Display<Cow<'static, str>> for Color {
             Color::Rgb(r, g, b) => Cow::from(format!("#{:02x}{:02x}{:02x}", r, g, b)),
             Color::White => Cow::from("white"),
             Color::Yellow => Cow::from("yellow"),
-        }
-    }
-}
-
-impl Display<&'static str> for Grid {
-    fn display(&self) -> &'static str {
-        match *self {
-            Grid::Major => "",
-            Grid::Minor => "m",
         }
     }
 }

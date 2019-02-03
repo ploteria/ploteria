@@ -6,7 +6,7 @@ pub use errorbar::ErrorBar::{XErrorBars, XErrorLines, YErrorBars, YErrorLines};
 pub use filledcurve::FilledCurve;
 pub use key::{Horizontal, Justification, Order, Position, Stacked, Vertical};
 pub use traits::{Configure, Plot};
+pub use axis::{Axes, Axis};
 pub use {
-    Axes, Axis, Color, Figure, Grid, Key, LineType, PointType, Range, Scale, Terminal,
-    TicLabels,
+    Color, Figure, Key, LineType, PointType, Range, Scale, Terminal, TicLabels,
 };
