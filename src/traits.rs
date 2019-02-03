@@ -1,16 +1,5 @@
 //! Traits
 
-/// Overloaded `configure` method
-pub trait Configure<This> {
-    /// The properties of what's being configured
-    type Properties;
-
-    /// Configure some set of properties
-    fn configure<F>(&mut self, This, F) -> &mut Self
-    where
-        F: FnOnce(&mut Self::Properties) -> &mut Self::Properties;
-}
-
 /// Types that can be plotted
 pub trait Data {
     /// Convert the type into a double precision float

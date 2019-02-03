@@ -33,7 +33,7 @@
 //! #   .font_size(12.)
 //! #   .output(Path::new("target/doc/ploteria/curve.svg"))
 //! #   .figure_size(1280, 720)
-//!     .configure(Key, |k| {
+//!     .configure_key(|k| {
 //!         k.boxed(true)
 //!          .position(Position::Inside(Vertical::Top, Horizontal::Left))
 //!     })
@@ -128,8 +128,8 @@
 //!             positions: &[-PI, 0., PI],
 //!         })
 //!     })
-//!     .configure(Key,
-//!                |k| k.position(Position::Outside(Vertical::Top, Horizontal::Right)))
+//!     .configure_key(|k|
+//!         k.position(Position::Outside(Vertical::Top, Horizontal::Right)))
 //!     .plot(Lines {
 //!               x: xs_,
 //!               y: xs_.iter().cloned().map(sinc),
@@ -278,7 +278,7 @@
 //!     .configure_axis(Axis::RightY, |a| a
 //!         .configure_major_grid(|g| g.show())
 //!         .label("Phase shift (°)"))
-//!     .configure(Key, |k| k
+//!     .configure_key(|k| k
 //!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
 //!         .title(" "))
 //!     .plot(Lines {
@@ -343,7 +343,7 @@
 //!     .title("Transparent filled curve")
 //!     .configure_axis(Axis::BottomX, |a| a.range(Range::Limits(start, end)))
 //!     .configure_axis(Axis::LeftY, |a| a.range(Range::Limits(0., 1.)))
-//!     .configure(Key, |k| {
+//!     .configure_key(|k| {
 //!         k.justification(Justification::Left)
 //!          .order(Order::SampleText)
 //!          .position(Position::Inside(Vertical::Top, Horizontal::Left))
@@ -410,7 +410,6 @@ use std::process::{Child, Command};
 use std::str;
 
 use data::Matrix;
-use traits::Configure;
 
 mod data;
 mod display;
@@ -426,6 +425,7 @@ pub mod prelude;
 pub mod traits;
 
 use axis::{Axes, AxisProperties, Axis};
+use key::KeyProperties;
 
 /// Plot container
 #[derive(Clone)]
@@ -435,7 +435,7 @@ pub struct Figure {
     box_width: Option<f64>,
     font: Option<Cow<'static, str>>,
     font_size: Option<f64>,
-    key: Option<key::Properties>,
+    key: Option<KeyProperties>,
     output: Cow<'static, Path>,
     plots: Vec<Plot>,
     size: Option<(usize, usize)>,
@@ -664,37 +664,30 @@ impl Figure {
         }
         self
     }
-}
 
-impl Configure<Key> for Figure {
-    type Properties = key::Properties;
-
-    /// Configures the key (legend)
-    fn configure<F>(&mut self, _: Key, configure: F) -> &mut Figure
-    where
-        F: FnOnce(&mut key::Properties) -> &mut key::Properties,
-    {
-        if self.key.is_some() {
-            configure(self.key.as_mut().unwrap());
-        } else {
-            let mut key = Default::default();
-            configure(&mut key);
-            self.key = Some(key);
+    /// Configures the key (legend).
+    pub fn configure_key<F: FnOnce(&mut KeyProperties) -> &mut KeyProperties>(
+        &mut self, configure: F
+    ) -> &mut Figure {
+        match self.key {
+            Some(ref mut key) => {
+                configure(key);
+            },
+            None => {
+                let mut key = Default::default();
+                configure(&mut key);
+                self.key = Some(key);
+            },
         }
         self
     }
 }
-
 
 impl Default for Figure {
     fn default() -> Self {
         Self::new()
     }
 }
-
-/// The key or legend
-#[derive(Clone, Copy)]
-pub struct Key;
 
 /// Axis range
 #[derive(Clone, Copy)]
