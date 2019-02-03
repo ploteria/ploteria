@@ -43,9 +43,8 @@ rustup component add rustfmt-preview
 cargo fmt --all
 ```
 
-Don't forget to update the CHANGELOG.md file and any appropriate documentation. Once
-you're finished, push to your fork and submit a pull request. We try to respond to new
-issues and pull requests quickly.
+Don't forget to update the documentation. Once you're finished, push to your fork and
+submit a pull request. We try to respond to new issues and pull requests quickly.
 
 Some things that will increase the chance that your pull request is accepted:
 
