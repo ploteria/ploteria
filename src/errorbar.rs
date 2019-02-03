@@ -121,7 +121,6 @@ impl Script for Properties {
     }
 }
 
-
 #[derive(Clone, Copy)]
 enum Style {
     XErrorBars,

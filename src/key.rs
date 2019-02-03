@@ -4,9 +4,13 @@ use std::borrow::Cow;
 
 use {Default, Display, Script};
 
-/// Properties of the key
+/// Properties of the key.
+///
+/// Modified through [`configure_key`].
+///
+/// [`configure_key`]: ../struct.Figure.html#method.configure_key
 #[derive(Clone)]
-pub struct Properties {
+pub struct KeyProperties {
     boxed: bool,
     hidden: bool,
     justification: Option<Justification>,
@@ -16,9 +20,9 @@ pub struct Properties {
     title: Option<Cow<'static, str>>,
 }
 
-impl Default for Properties {
-    fn default() -> Properties {
-        Properties {
+impl Default for KeyProperties {
+    fn default() -> KeyProperties {
+        KeyProperties {
             boxed: false,
             hidden: false,
             justification: None,
@@ -30,9 +34,9 @@ impl Default for Properties {
     }
 }
 
-impl Properties {
+impl KeyProperties {
     /// Hides the key
-    pub fn hide(&mut self) -> &mut Properties {
+    pub fn hide(&mut self) -> &mut KeyProperties {
         self.hidden = true;
         self
     }
@@ -40,7 +44,7 @@ impl Properties {
     /// Shows the key
     ///
     /// **Note** The key is shown by default
-    pub fn show(&mut self) -> &mut Properties {
+    pub fn show(&mut self) -> &mut KeyProperties {
         self.hidden = false;
         self
     }
@@ -48,7 +52,7 @@ impl Properties {
     /// Should the key be surrounded by a box or not?
     ///
     /// **Note** The key is not boxed by default
-    pub fn boxed(&mut self, boxed: bool) -> &mut Properties {
+    pub fn boxed(&mut self, boxed: bool) -> &mut KeyProperties {
         self.boxed = boxed;
         self
     }
@@ -56,7 +60,7 @@ impl Properties {
     /// Changes the justification of the text of each entry
     ///
     /// **Note** The text is `RightJustified` by default
-    pub fn justification(&mut self, justification: Justification) -> &mut Properties {
+    pub fn justification(&mut self, justification: Justification) -> &mut KeyProperties {
         self.justification = Some(justification);
         self
     }
@@ -64,7 +68,7 @@ impl Properties {
     /// How to order each entry
     ///
     /// **Note** The default order is `TextSample`
-    pub fn order(&mut self, order: Order) -> &mut Properties {
+    pub fn order(&mut self, order: Order) -> &mut KeyProperties {
         self.order = Some(order);
         self
     }
@@ -72,19 +76,19 @@ impl Properties {
     /// Selects where to place the key
     ///
     /// **Note** By default, the key is placed `Inside(Vertical::Top, Horizontal::Right)`
-    pub fn position(&mut self, position: Position) -> &mut Properties {
+    pub fn position(&mut self, position: Position) -> &mut KeyProperties {
         self.position = Some(position);
         self
     }
 
     /// Changes how the entries of the key are stacked
-    pub fn stacked(&mut self, stacked: Stacked) -> &mut Properties {
+    pub fn stacked(&mut self, stacked: Stacked) -> &mut KeyProperties {
         self.stacked = Some(stacked);
         self
     }
 
     /// Set the title
-    pub fn title<S>(&mut self, title: S) -> &mut Properties
+    pub fn title<S>(&mut self, title: S) -> &mut KeyProperties
     where
         S: Into<Cow<'static, str>>,
     {
@@ -93,7 +97,7 @@ impl Properties {
     }
 }
 
-impl Script for Properties {
+impl Script for KeyProperties {
     fn script(&self) -> String {
         let mut script = if self.hidden {
             return String::from("set key off\n");
@@ -137,7 +141,6 @@ impl Script for Properties {
         script.push('\n');
         script
     }
-
 }
 
 /// Horizontal position of the key

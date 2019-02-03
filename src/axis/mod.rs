@@ -1,16 +1,59 @@
 //! Coordinate axis
 
+mod grid;
+pub use self::grid::Gridline;
+
 use std::borrow::Cow;
 use std::iter::IntoIterator;
 
-use map;
-use traits::{Configure, Data};
-use {grid, Axis, Default, Display, Grid, Range, Scale, Script, TicLabels};
+use traits::Data;
+use {Default, Display, Range, Scale, Script, TicLabels};
 
-/// Properties of the coordinate axes
+/// A coordinate axis
+#[derive(Clone, Copy)]
+pub enum Axis {
+    /// X axis on the bottom side of the figure
+    BottomX,
+    /// Y axis on the left side of the figure
+    LeftY,
+    /// Y axis on the right side of the figure
+    RightY,
+    /// X axis on the top side of the figure
+    TopX,
+}
+
+/// A pair of axes that define a coordinate system.
+#[allow(missing_docs)]
+#[derive(Clone, Copy)]
+pub enum Axes {
+    BottomXLeftY,
+    BottomXRightY,
+    TopXLeftY,
+    TopXRightY,
+}
+
+impl Axis {
+    pub(crate) fn next(self) -> Option<Axis> {
+        use Axis::*;
+
+        match self {
+            BottomX => Some(LeftY),
+            LeftY => Some(RightY),
+            RightY => Some(TopX),
+            TopX => None,
+        }
+    }
+}
+
+/// Properties of the coordinate axes.
+///
+/// Modified through [`configure_axis`].
+///
+/// [`configure_axis`]: ../struct.Figure.html#method.configure_axis
 #[derive(Clone)]
-pub struct Properties {
-    grids: map::grid::Map<grid::Properties>,
+pub struct AxisProperties {
+    major_grid: Gridline,
+    minor_grid: Gridline,
     hidden: bool,
     label: Option<Cow<'static, str>>,
     logarithmic: bool,
@@ -19,10 +62,11 @@ pub struct Properties {
     tics: Option<String>,
 }
 
-impl Default for Properties {
-    fn default() -> Properties {
-        Properties {
-            grids: map::grid::Map::new(),
+impl Default for AxisProperties {
+    fn default() -> AxisProperties {
+        AxisProperties {
+            major_grid: Gridline::new(false),
+            minor_grid: Gridline::new(true),
             hidden: false,
             label: None,
             logarithmic: false,
@@ -33,11 +77,11 @@ impl Default for Properties {
     }
 }
 
-impl Properties {
+impl AxisProperties {
     /// Hides the axis
     ///
     /// **Note** The `TopX` and `RightY` axes are hidden by default
-    pub fn hide(&mut self) -> &mut Properties {
+    pub fn hide(&mut self) -> &mut AxisProperties {
         self.hidden = true;
         self
     }
@@ -45,13 +89,13 @@ impl Properties {
     /// Makes the axis visible
     ///
     /// **Note** The `BottomX` and `LeftY` axes are visible by default
-    pub fn show(&mut self) -> &mut Properties {
+    pub fn show(&mut self) -> &mut AxisProperties {
         self.hidden = false;
         self
     }
 
     /// Attaches a label to the axis
-    pub fn label<S>(&mut self, label: S) -> &mut Properties
+    pub fn label<S>(&mut self, label: S) -> &mut AxisProperties
     where
         S: Into<Cow<'static, str>>,
     {
@@ -62,7 +106,7 @@ impl Properties {
     /// Changes the range of the axis that will be shown
     ///
     /// **Note** All axes are auto-scaled by default
-    pub fn range(&mut self, range: Range) -> &mut Properties {
+    pub fn range(&mut self, range: Range) -> &mut AxisProperties {
         self.hidden = false;
 
         match range {
@@ -76,7 +120,7 @@ impl Properties {
     /// Sets the scale of the axis
     ///
     /// **Note** All axes use a linear scale by default
-    pub fn scale(&mut self, scale: Scale) -> &mut Properties {
+    pub fn scale(&mut self, scale: Scale) -> &mut AxisProperties {
         self.hidden = false;
 
         match scale {
@@ -93,16 +137,14 @@ impl Properties {
     /// scaled with this factor before being plotted.
     ///
     /// **Note** The default scale factor is `1`.
-    pub fn scale_factor(&mut self, factor: f64) -> &mut Properties {
+    pub fn scale_factor(&mut self, factor: f64) -> &mut AxisProperties {
         self.scale_factor = factor;
 
         self
     }
 
     /// Attaches labels to the tics of an axis
-    pub fn tick_labels<P, L>(
-        &mut self, tics: TicLabels<P, L>
-    ) -> &mut Properties
+    pub fn tick_labels<P, L>(&mut self, tics: TicLabels<P, L>) -> &mut AxisProperties
     where
         L: IntoIterator,
         L::Item: AsRef<str>,
@@ -125,30 +167,27 @@ impl Properties {
 
         self
     }
-}
 
+    /// Configure the major grid. These grid lines are places on the major tic marks.
+    pub fn configure_major_grid<F: FnOnce(&mut Gridline) -> &mut Gridline>(
+        &mut self,
+        configure: F,
+    ) -> &mut AxisProperties {
+        configure(&mut self.major_grid);
+        self
+    }
 
-impl Configure<Grid> for Properties {
-    type Properties = grid::Properties;
-
-    /// Configures the gridlines
-    fn configure<F>(&mut self, grid: Grid, configure: F) -> &mut Properties
-    where
-        F: FnOnce(&mut grid::Properties) -> &mut grid::Properties,
-    {
-        if self.grids.contains_key(grid) {
-            configure(self.grids.get_mut(grid).unwrap());
-        } else {
-            let mut properties = Default::default();
-            configure(&mut properties);
-            self.grids.insert(grid, properties);
-        }
-
+    /// Configure the minor grid. These grid lines are places on the minor tic marks.
+    pub fn configure_minor_grid<F: FnOnce(&mut Gridline) -> &mut Gridline>(
+        &mut self,
+        configure: F,
+    ) -> &mut AxisProperties {
+        configure(&mut self.minor_grid);
         self
     }
 }
 
-impl<'a> Script for (Axis, &'a Properties) {
+impl<'a> Script for (Axis, &'a AxisProperties) {
     fn script(&self) -> String {
         let &(axis, properties) = self;
         let axis_ = axis.display();
@@ -177,15 +216,14 @@ impl<'a> Script for (Axis, &'a Properties) {
             script.push_str(&format!("set logscale {}\n", axis_));
         }
 
-        for (grid, properties) in properties.grids.iter() {
-            script.push_str(&(axis, grid, properties).script());
-        }
+        script.push_str(&(axis, &properties.major_grid).script());
+        script.push_str(&(axis, &properties.minor_grid).script());
 
         script
     }
 }
 
-impl ::ScaleFactorTrait for Properties {
+impl ::ScaleFactorTrait for AxisProperties {
     fn scale_factor(&self) -> f64 {
         self.scale_factor
     }
