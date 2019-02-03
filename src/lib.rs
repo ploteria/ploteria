@@ -395,25 +395,26 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::doc_markdown))]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 
-extern crate byteorder;
-extern crate cast;
-#[macro_use]
-extern crate itertools;
-
 use std::borrow::Cow;
-use std::fmt;
+use std::fmt::{Display as FmtDisplay, Formatter, Result as FmtResult};
 use std::fs::File;
 use std::io;
 use std::num::ParseIntError;
 use std::path::Path;
 use std::process::{Child, Command};
 use std::str;
+use std::{error::Error, default::Default};
 
-use data::Matrix;
-
+use crate::data::Matrix;
+use crate::traits::{Configure};
+use crate::map::axis::{Map, Properties};
+use crate::key::Properties as KeyProperties;
+use crate::axis::ScaleFactorTrait;
 mod data;
 mod display;
 mod map;
+use crate::axis::{Axes, Axis, AxisProperties};
+use crate::key::KeyProperties;
 
 pub mod axis;
 pub mod candlestick;
@@ -424,14 +425,13 @@ pub mod key;
 pub mod prelude;
 pub mod traits;
 
-use axis::{Axes, Axis, AxisProperties};
-use key::KeyProperties;
+
 
 /// Plot container
 #[derive(Clone)]
 pub struct Figure {
     alpha: Option<f64>,
-    axes: map::axis::Map<axis::AxisProperties>,
+    axes: Map<Properties>,
     box_width: Option<f64>,
     font: Option<Cow<'static, str>>,
     font_size: Option<f64>,
@@ -440,16 +440,15 @@ pub struct Figure {
     plots: Vec<Plot>,
     size: Option<(usize, usize)>,
     terminal: Terminal,
-    tics: map::axis::Map<String>,
+    tics: Map<String>,
     title: Option<Cow<'static, str>>,
 }
 
 impl Figure {
-    /// Creates an empty figure
     pub fn new() -> Figure {
         Figure {
             alpha: None,
-            axes: map::axis::Map::new(),
+            axes: Map::new(),
             box_width: None,
             font: None,
             font_size: None,
@@ -694,7 +693,7 @@ impl Default for Figure {
 
 /// Color
 #[allow(missing_docs)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Color {
     Black,
     Blue,
@@ -712,9 +711,29 @@ pub enum Color {
     Yellow,
 }
 
+/// Grid line
+#[derive(Clone, Copy)]
+pub enum Grid {
+    /// Major gridlines
+    Major,
+    /// Minor gridlines
+    Minor,
+}
+
+impl Grid {
+    fn next(self) -> Option<Grid> {
+        use Grid::*;
+
+        match self {
+            Major => Some(Minor),
+            Minor => None,
+        }
+    }
+}
+
 /// Line type
 #[allow(missing_docs)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum LineType {
     Dash,
     Dot,
@@ -725,9 +744,15 @@ pub enum LineType {
     Solid,
 }
 
+impl Default for LineType {
+    fn default() -> Self {
+        LineType::Solid
+    }
+}
+
 /// Point type
 #[allow(missing_docs)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum PointType {
     Circle,
     FilledCircle,
@@ -742,16 +767,9 @@ pub enum PointType {
 
 /// Output terminal
 #[allow(missing_docs)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Terminal {
     Svg,
-}
-
-/// Not public version of `std::default::Default`, used to not leak default constructors into the
-/// public API
-trait Default {
-    /// Creates `Properties` with default configuration
-    fn default() -> Self;
 }
 
 /// Enums that can produce gnuplot code
@@ -778,7 +796,7 @@ trait Script {
     fn script(&self) -> String;
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Plot {
     data: Matrix,
     script: String,
@@ -816,8 +834,8 @@ pub enum VersionError {
     /// The `gnuplot` command returned an unparseable string
     ParseError(String),
 }
-impl fmt::Display for VersionError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl FmtDisplay for VersionError {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match self {
             VersionError::Exec(err) => write!(f, "`gnuplot --version` failed: {}", err),
             VersionError::Error(msg) => {
@@ -832,7 +850,7 @@ impl fmt::Display for VersionError {
         }
     }
 }
-impl ::std::error::Error for VersionError {
+impl Error for VersionError {
     fn description(&self) -> &str {
         match self {
             VersionError::Exec(_) => "Execution Error",
@@ -851,6 +869,7 @@ impl ::std::error::Error for VersionError {
 }
 
 /// Structure representing a gnuplot version number.
+#[derive(Clone, Debug)]
 pub struct Version {
     /// The major version number
     pub major: usize,
@@ -913,13 +932,6 @@ fn scale_factor(map: &map::axis::Map<AxisProperties>, axes: Axes) -> (f64, f64) 
             map.get(RightY).map_or(1., |props| props.scale_factor()),
         ),
     }
-}
-
-// XXX :-1: to intra-crate privacy rules
-/// Private
-trait ScaleFactorTrait {
-    /// Private
-    fn scale_factor(&self) -> f64;
 }
 
 #[cfg(test)]

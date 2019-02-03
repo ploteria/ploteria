@@ -8,8 +8,9 @@ authors = [
     ]
 name = "ploteria"
 version = "0.1.0"
+edition = "2018"
 
-description = "Criterion's plotting library"
+description = "plotting library that can be used with Criterion"
 repository = "https://github.com/ploteria/ploteria"
 readme = "README.md"
 keywords = ["plotting", "gnuplot", "criterion"]

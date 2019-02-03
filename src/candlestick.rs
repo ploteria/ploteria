@@ -2,71 +2,50 @@
 
 use std::borrow::Cow;
 use std::iter::IntoIterator;
+use std::{fmt::Debug, default::Default};
 
 use data::Matrix;
-use traits::{self, Data};
-use {Color, Default, Display, Figure, LineType, Plot, Script};
+use traits::{self, Data, Set};
+use {Color, Default, Display, Figure, Label, LineType, LineWidth, Plot, Script};
 
 /// Properties common to candlestick plots
+#[derive(Debug, Default)]
 pub struct Properties {
     color: Option<Color>,
     label: Option<Cow<'static, str>>,
     line_type: LineType,
-    linewidth: Option<f64>,
+    line_width: Option<f64>,
 }
 
 impl Properties {
-    /// Sets the line color
-    pub fn color(&mut self, color: Color) -> &mut Properties {
+    pub fn color(mut self, color: Color) -> Properties {
         self.color = Some(color);
+
         self
     }
 
-    /// Sets the legend label
-    pub fn label<S>(&mut self, label: S) -> &mut Properties
-    where
-        S: Into<Cow<'static, str>>,
-    {
-        self.label = Some(label.into());
+    pub fn label(mut self, label: Label) -> Properties {
+        self.label = Some(label.0);
+
         self
     }
 
-    /// Changes the line type
-    ///
-    /// **Note** By default `Solid` lines are used
-    pub fn line_type(&mut self, lt: LineType) -> &mut Properties {
-        self.line_type = lt;
+    pub fn line_type(mut self, line_type: LineType) -> Properties {
+        self.line_type = line_type;
+
         self
     }
 
-    /// Changes the width of the line
-    ///
-    /// # Panics
-    ///
-    /// Panics if `width` is a non-positive value
-    pub fn line_width(&mut self, lw: f64) -> &mut Properties {
-        assert!(lw > 0.);
+    pub fn line_width(mut self, line_width: LineWidth) -> Properties {
+        self.linewidth = line_width;
 
-        self.linewidth = Some(lw);
         self
-    }
-}
-
-impl Default for Properties {
-    fn default() -> Properties {
-        Properties {
-            color: None,
-            label: None,
-            line_type: LineType::Solid,
-            linewidth: None,
-        }
     }
 }
 
 impl Script for Properties {
     fn script(&self) -> String {
         let mut script = String::from("with candlesticks ");
-
         script.push_str(&format!("lt {} ", self.line_type.display()));
 
         if let Some(lw) = self.linewidth {
@@ -90,7 +69,15 @@ impl Script for Properties {
 }
 
 /// A candlestick consists of a box and two whiskers that extend beyond the box
-pub struct Candlesticks<X, WM, BM, BH, WH> {
+#[derive(Debug)]
+pub struct Candlesticks<X, WM, BM, BH, WH>
+where
+    X: Debug,
+    WM: Debug,
+    BM: Debug,
+    BH: Debug,
+    WH: Debug
+{
     /// X coordinate of the candlestick
     pub x: X,
     /// Y coordinate of the end point of the bottom whisker
@@ -103,17 +90,17 @@ pub struct Candlesticks<X, WM, BM, BH, WH> {
     pub whisker_high: WH,
 }
 
-impl<X, WM, BM, BH, WH> traits::Plot<Candlesticks<X, WM, BM, BH, WH>> for Figure
+impl<X, WM, BM, BH, WH> PlotTrait<Candlesticks<X, WM, BM, BH, WH>> for Figure
 where
-    BH: IntoIterator,
+    BH: IntoIterator + Debug,
     BH::Item: Data,
-    BM: IntoIterator,
+    BM: IntoIterator + Debug,
     BM::Item: Data,
-    WH: IntoIterator,
+    WH: IntoIterator + Debug,
     WH::Item: Data,
-    WM: IntoIterator,
+    WM: IntoIterator + Debug,
     WM::Item: Data,
-    X: IntoIterator,
+    X: IntoIterator + Debug,
     X::Item: Data,
 {
     type Properties = Properties;
@@ -125,8 +112,13 @@ where
     ) -> &mut Figure
     where
         F: FnOnce(&mut Properties) -> &mut Properties,
+        X: Debug,
+        WM: Debug,
+        BM: Debug,
+        BH: Debug,
+        WH: Debug
     {
-        let (x_factor, y_factor) = ::scale_factor(&self.axes, ::Axes::BottomXLeftY);
+        let (x_factor, y_factor) = scale_factor(&self.axes, Axes::BottomXLeftY);
         let Candlesticks {
             x,
             whisker_min,

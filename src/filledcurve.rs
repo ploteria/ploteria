@@ -2,12 +2,15 @@
 
 use std::borrow::Cow;
 use std::iter::IntoIterator;
+use std::fmt::Debug;
+use itertools::izip;
 
-use data::Matrix;
-use traits::{self, Data};
-use {Axes, Color, Default, Display, Figure, Plot, Script};
+use crate::data::Matrix;
+use crate::traits::{Data, Plot as PlotTrait};
+use crate::{Axes, Color, Display, Figure, Label, Opacity, Plot, Script, scale_factor};
 
 /// Properties common to filled curve plots
+#[derive(Debug, Default)]
 pub struct Properties {
     axes: Option<Axes>,
     color: Option<Color>,
@@ -98,7 +101,13 @@ impl Script for Properties {
 }
 
 /// Fills the area between two curves
-pub struct FilledCurve<X, Y1, Y2> {
+#[derive(Debug)]
+pub struct FilledCurve<X, Y1, Y2>
+where
+    X: Debug,
+    Y1: Debug,
+    Y2: Debug
+{
     /// X coordinate of the data points of both curves
     pub x: X,
     /// Y coordinate of the data points of the first curve
@@ -107,13 +116,13 @@ pub struct FilledCurve<X, Y1, Y2> {
     pub y2: Y2,
 }
 
-impl<X, Y1, Y2> traits::Plot<FilledCurve<X, Y1, Y2>> for Figure
+impl<X, Y1, Y2> PlotTrait<FilledCurve<X, Y1, Y2>> for Figure
 where
-    X: IntoIterator,
+    X: IntoIterator + Debug,
     X::Item: Data,
-    Y1: IntoIterator,
+    Y1: IntoIterator + Debug,
     Y1::Item: Data,
-    Y2: IntoIterator,
+    Y2: IntoIterator + Debug,
     Y2::Item: Data,
 {
     type Properties = Properties;
@@ -128,7 +137,7 @@ where
         configure(&mut props);
 
         let (x_factor, y_factor) =
-            ::scale_factor(&self.axes, props.axes.unwrap_or(::Axes::BottomXLeftY));
+            scale_factor(&self.axes, props.axes.unwrap_or(Axes::BottomXLeftY));
 
         let data = Matrix::new(izip!(x, y1, y2), (x_factor, y_factor, y_factor));
         self.plots.push(Plot::new(data, &props));

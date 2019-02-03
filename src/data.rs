@@ -5,7 +5,7 @@ use std::mem;
 use byteorder::{LittleEndian, WriteBytesExt};
 use cast::From as _0;
 
-use traits::Data;
+use crate::traits::Data;
 
 macro_rules! impl_data {
     ($($ty:ty),+) => {
@@ -27,7 +27,7 @@ macro_rules! impl_data {
 
 impl_data!(f32, f64, i16, i32, i64, i8, isize, u16, u32, u64, u8, usize);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Matrix {
     bytes: Vec<u8>,
     ncols: usize,

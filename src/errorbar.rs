@@ -2,12 +2,19 @@
 
 use std::borrow::Cow;
 use std::iter::IntoIterator;
+use std::fmt::Debug;
 
-use data::Matrix;
-use traits::{self, Data};
-use {Color, Display, ErrorBarDefault, Figure, LineType, Plot, PointType, Script};
+use crate::data::Matrix;
+use crate::traits::{Data, Plot as PlotTrait};
+use crate::{
+    Axes, Color, Display, ErrorBarDefault, Figure, Label, LineType, LineWidth, Plot, PointSize,
+    PointType, Script, scale_factor
+};
+
+use itertools::izip;
 
 /// Properties common to error bar plots
+#[derive(Clone, Debug)]
 pub struct Properties {
     color: Option<Color>,
     label: Option<Cow<'static, str>>,
@@ -121,7 +128,8 @@ impl Script for Properties {
     }
 }
 
-#[derive(Clone, Copy)]
+
+#[derive(Clone, Copy, Debug)]
 enum Style {
     XErrorBars,
     XErrorLines,
@@ -141,7 +149,15 @@ impl Display<&'static str> for Style {
 }
 
 /// Asymmetric error bar plots
-pub enum ErrorBar<X, Y, L, H> {
+#[derive(Debug)]
+pub enum ErrorBar<X, Y, L, H>
+where
+    X: Debug,
+    Y: Debug,
+    L: Debug,
+    H: Debug
+
+{
     /// Horizontal error bars
     XErrorBars {
         /// X coordinate of the data points
@@ -188,7 +204,13 @@ pub enum ErrorBar<X, Y, L, H> {
     },
 }
 
-impl<X, Y, L, H> ErrorBar<X, Y, L, H> {
+impl<X, Y, L, H> ErrorBar<X, Y, L, H>
+where
+    X: Debug,
+    Y: Debug,
+    L: Debug,
+    H: Debug
+{
     fn style(&self) -> Style {
         match *self {
             ErrorBar::XErrorBars { .. } => Style::XErrorBars,
@@ -199,15 +221,15 @@ impl<X, Y, L, H> ErrorBar<X, Y, L, H> {
     }
 }
 
-impl<X, Y, L, H> traits::Plot<ErrorBar<X, Y, L, H>> for Figure
+impl<X, Y, L, H> PlotTrait<ErrorBar<X, Y, L, H>> for Figure
 where
-    H: IntoIterator,
+    H: IntoIterator + Debug,
     H::Item: Data,
-    L: IntoIterator,
+    L: IntoIterator + Debug,
     L::Item: Data,
-    X: IntoIterator,
+    X: IntoIterator + Debug,
     X::Item: Data,
-    Y: IntoIterator,
+    Y: IntoIterator + Debug,
     Y::Item: Data,
 {
     type Properties = Properties;
@@ -216,7 +238,7 @@ where
     where
         F: FnOnce(&mut Properties) -> &mut Properties,
     {
-        let (x_factor, y_factor) = ::scale_factor(&self.axes, ::Axes::BottomXLeftY);
+        let (x_factor, y_factor) = scale_factor(&self.axes, Axes::BottomXLeftY);
 
         let style = e.style();
         let (x, y, length, height, e_factor) = match e {

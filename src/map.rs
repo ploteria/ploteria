@@ -1,19 +1,22 @@
 //! Enum Maps
 
 pub mod axis {
-    use Axis;
+    use crate::Axis;
+    use std::fmt::Debug;
 
     const LENGTH: usize = 4;
 
     pub struct Items<'a, T>
     where
-        T: 'a,
+        T: Debug + 'a,
     {
         map: &'a Map<T>,
         state: Option<Axis>,
     }
 
-    impl<'a, T> Iterator for Items<'a, T> {
+    impl<'a, T> Iterator for Items<'a, T>
+    where T: Debug
+    {
         type Item = (Axis, &'a T);
 
         fn next(&mut self) -> Option<(Axis, &'a T)> {
@@ -29,15 +32,21 @@ pub mod axis {
         }
     }
 
-    pub struct Map<T>([Option<T>; LENGTH]);
+    #[derive(Debug)]
+    pub struct Map<T: Debug>([Option<T>; LENGTH]);
 
-    impl<T> Default for Map<T> {
+    impl<T> Default for Map<T>
+    where T: Debug
+    {
         fn default() -> Self {
             Self::new()
         }
     }
 
-    impl<T> Map<T> {
+    impl<T> Map<T>
+    where
+        T: Debug
+    {
         pub fn new() -> Map<T> {
             Map([None, None, None, None])
         }
@@ -73,7 +82,7 @@ pub mod axis {
 
     impl<T> Clone for Map<T>
     where
-        T: Clone,
+        T: Clone + Debug,
     {
         fn clone(&self) -> Map<T> {
             Map([
@@ -82,6 +91,94 @@ pub mod axis {
                 self.0[2].clone(),
                 self.0[3].clone(),
             ])
+        }
+    }
+}
+
+pub mod grid {
+    use crate::Grid;
+    use std::fmt::Debug;
+
+    const LENGTH: usize = 2;
+
+    #[derive(Debug)]
+    pub struct Items<'a, T>
+    where
+        T: Debug + 'a,
+    {
+        map: &'a Map<T>,
+        state: Option<Grid>,
+    }
+
+    impl<'a, T> Iterator for Items<'a, T>
+    where T: Debug
+    {
+        type Item = (Grid, &'a T);
+
+        fn next(&mut self) -> Option<(Grid, &'a T)> {
+            while let Some(key) = self.state {
+                self.state = key.next();
+
+                if let Some(value) = self.map.get(key) {
+                    return Some((key, value));
+                }
+            }
+
+            None
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct Map<T: Debug>([Option<T>; LENGTH]);
+
+    impl<T: Debug> Map<T> {
+        pub fn new() -> Map<T> {
+            Map([None, None])
+        }
+
+        pub fn contains_key(&self, key: Grid) -> bool {
+            self.0[key as usize].is_some()
+        }
+
+        pub fn get(&self, key: Grid) -> Option<&T> {
+            self.0[key as usize].as_ref()
+        }
+
+        pub fn get_mut(&mut self, key: Grid) -> Option<&mut T> {
+            self.0[key as usize].as_mut()
+        }
+
+        pub fn insert(&mut self, key: Grid, value: T) -> Option<T> {
+            let key = key as usize;
+            let old = self.0[key].take();
+
+            self.0[key] = Some(value);
+
+            old
+        }
+
+        pub fn iter(&self) -> Items<T> {
+            Items {
+                map: self,
+                state: Some(Grid::Major),
+            }
+        }
+    }
+
+    impl<T> Clone for Map<T>
+    where
+        T: Clone + Debug,
+    {
+        fn clone(&self) -> Map<T> {
+            Map([self.0[0].clone(), self.0[1].clone()])
+        }
+    }
+
+    impl<T> Default for Map<T>
+    where T: Debug
+    {
+        fn default() -> Self {
+            Self::new()
         }
     }
 }

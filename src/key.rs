@@ -2,15 +2,15 @@
 
 use std::borrow::Cow;
 
-use {Default, Display, Script};
+use crate::{Display, Script, Title};
 
-/// Properties of the key.
+/// KeyProperies of the key.
 ///
 /// Modified through [`configure_key`].
 ///
 /// [`configure_key`]: ../struct.Figure.html#method.configure_key
-#[derive(Clone)]
-pub struct KeyProperties {
+#[derive(Clone, Debug, Default)]
+pub struct KeyKeyProperies {
     boxed: bool,
     hidden: bool,
     justification: Option<Justification>,
@@ -20,79 +20,70 @@ pub struct KeyProperties {
     title: Option<Cow<'static, str>>,
 }
 
-impl Default for KeyProperties {
-    fn default() -> KeyProperties {
-        KeyProperties {
-            boxed: false,
-            hidden: false,
-            justification: None,
-            order: None,
-            position: None,
-            stacked: None,
-            title: None,
-        }
-    }
-}
-
-impl KeyProperties {
+impl KeyProperies {
     /// Hides the key
-    pub fn hide(&mut self) -> &mut KeyProperties {
+    pub fn hide(mut self) -> KeyProperies {
         self.hidden = true;
+
         self
     }
 
     /// Shows the key
     ///
     /// **Note** The key is shown by default
-    pub fn show(&mut self) -> &mut KeyProperties {
+    pub fn show(mut self) -> Properties {
         self.hidden = false;
+
         self
     }
 
     /// Should the key be surrounded by a box or not?
     ///
     /// **Note** The key is not boxed by default
-    pub fn boxed(&mut self, boxed: bool) -> &mut KeyProperties {
-        self.boxed = boxed;
+    pub fn boxed(mut self, boxed: Boxed) -> Properties {
+        self.boxed = boxed.into();
+
         self
     }
 
     /// Changes the justification of the text of each entry
     ///
     /// **Note** The text is `RightJustified` by default
-    pub fn justification(&mut self, justification: Justification) -> &mut KeyProperties {
+    pub fn justification(mut self, justification: Justification) -> Properties {
         self.justification = Some(justification);
+
         self
     }
 
     /// How to order each entry
     ///
     /// **Note** The default order is `TextSample`
-    pub fn order(&mut self, order: Order) -> &mut KeyProperties {
+    pub fn order(mut self, order: Order) -> Properties {
         self.order = Some(order);
+
         self
     }
 
     /// Selects where to place the key
     ///
     /// **Note** By default, the key is placed `Inside(Vertical::Top, Horizontal::Right)`
-    pub fn position(&mut self, position: Position) -> &mut KeyProperties {
+    pub fn position(mut self, position: Position) -> Properties {
         self.position = Some(position);
+
         self
     }
 
     /// Changes how the entries of the key are stacked
-    pub fn stacked(&mut self, stacked: Stacked) -> &mut KeyProperties {
+    pub fn stacked(mut self, stacked: Stacked) -> Properties {
         self.stacked = Some(stacked);
+
         self
     }
 
     /// Set the title
-    pub fn title<S>(&mut self, title: S) -> &mut KeyProperties
-    where
-        S: Into<Cow<'static, str>>,
-    {
-        self.title = Some(title.into());
+    pub fn title(mut self, title: Title) -> Properties {
+        self.title = Some(title.0);
+
         self
     }
 }
@@ -143,8 +134,25 @@ impl Script for KeyProperties {
     }
 }
 
+/// Whether the key is surrounded by a box or not
+#[allow(missing_docs)]
+#[derive(Clone, Copy, Debug)]
+pub enum Boxed {
+    No,
+    Yes,
+}
+
+impl Into<bool> for Boxed {
+    fn into(self) -> bool {
+        match self {
+            Boxed::Yes => true,
+            Boxed::No => false
+        }
+    }
+}
+
 /// Horizontal position of the key
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Horizontal {
     /// Center of the figure
     Center,
@@ -156,14 +164,14 @@ pub enum Horizontal {
 
 /// Text justification of the key
 #[allow(missing_docs)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Justification {
     Left,
     Right,
 }
 
 /// Order of the elements of the key
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Order {
     /// Sample first, then text
     SampleText,
@@ -173,7 +181,7 @@ pub enum Order {
 
 /// Position of the key
 // TODO XY position
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Position {
     /// Inside the area surrounded by the four (BottomX, TopX, LeftY and RightY) axes
     Inside(Vertical, Horizontal),
@@ -183,14 +191,14 @@ pub enum Position {
 
 /// How the entries of the key are stacked
 #[allow(missing_docs)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Stacked {
     Horizontally,
     Vertically,
 }
 
 /// Vertical position of the key
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Vertical {
     /// Bottom border of the figure
     Bottom,

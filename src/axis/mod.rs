@@ -6,87 +6,14 @@ pub use self::grid::Gridline;
 use std::borrow::Cow;
 use std::iter::IntoIterator;
 
-use traits::Data;
-use {Default, Display, Script};
+use crate::map::grid::Map;
+use crate::traits::{Configure, Data};
+use crate::{grid::Properties as GridProperties, Axis, Grid, Label, Range, Scale, ScaleFactor, Script, TicLabels};
 
-/// A coordinate axis
-#[derive(Clone, Copy)]
-pub enum Axis {
-    /// X axis on the bottom side of the figure
-    BottomX,
-    /// Y axis on the left side of the figure
-    LeftY,
-    /// Y axis on the right side of the figure
-    RightY,
-    /// X axis on the top side of the figure
-    TopX,
-}
-
-impl Axis {
-    pub(crate) fn next(self) -> Option<Axis> {
-        use Axis::*;
-
-        match self {
-            BottomX => Some(LeftY),
-            LeftY => Some(RightY),
-            RightY => Some(TopX),
-            TopX => None,
-        }
-    }
-}
-
-/// A pair of axes that define a coordinate system.
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub enum Axes {
-    BottomXLeftY,
-    BottomXRightY,
-    TopXLeftY,
-    TopXRightY,
-}
-
-/// Axis range
-///
-/// Used by [`AxisProperties::range`].
-///
-/// [`AxisProperties::range`]: struct.AxisProperties.html#method.range
-#[derive(Clone, Copy)]
-pub enum Range {
-    /// Autoscale the axis
-    Auto,
-    /// Set the limits of the axis
-    Limits(f64, f64),
-}
-
-/// Axis scale.
-///
-/// Used by [`AxisProperties::scale`].
-///
-/// [`AxisProperties::scale`]: struct.AxisProperties.html#method.scale
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub enum Scale {
-    Linear,
-    Logarithmic,
-}
-
-/// Labels attached to the tics of an axis
-pub struct TicLabels<P, L> {
-    /// Labels to attach to the tics
-    pub labels: L,
-    /// Position of the tics on the axis
-    pub positions: P,
-}
-
-/// Properties of the coordinate axes.
-///
-/// Modified through [`configure_axis`].
-///
-/// [`configure_axis`]: ../struct.Figure.html#method.configure_axis
-#[derive(Clone)]
-pub struct AxisProperties {
-    major_grid: Gridline,
-    minor_grid: Gridline,
+/// Properties of the coordinate axes
+#[derive(Clone, Debug)]
+pub struct Properties {
+    grids: Map<GridProperties>,
     hidden: bool,
     label: Option<Cow<'static, str>>,
     logarithmic: bool,
@@ -95,11 +22,10 @@ pub struct AxisProperties {
     tics: Option<String>,
 }
 
-impl Default for AxisProperties {
-    fn default() -> AxisProperties {
-        AxisProperties {
-            major_grid: Gridline::new(false),
-            minor_grid: Gridline::new(true),
+impl Default for Properties {
+    fn default() -> Properties {
+        Properties {
+            grids: Map::new(),
             hidden: false,
             label: None,
             logarithmic: false,
@@ -126,7 +52,6 @@ impl AxisProperties {
         self.hidden = false;
         self
     }
-
     /// Attaches a label to the axis
     pub fn label<S>(&mut self, label: S) -> &mut AxisProperties
     where
@@ -156,10 +81,7 @@ impl AxisProperties {
     pub fn scale(&mut self, scale: Scale) -> &mut AxisProperties {
         self.hidden = false;
 
-        match scale {
-            Scale::Linear => self.logarithmic = false,
-            Scale::Logarithmic => self.logarithmic = true,
-        }
+        self.logarithmic = scale == Scale::Logarithmic;
 
         self
     }
@@ -256,7 +178,11 @@ impl<'a> Script for (Axis, &'a AxisProperties) {
     }
 }
 
-impl ::ScaleFactorTrait for AxisProperties {
+pub(crate) trait ScaleFactorTrait {
+    fn scale_factor(&self) -> f64;
+}
+
+impl ScaleFactorTrait for Properties {
     fn scale_factor(&self) -> f64 {
         self.scale_factor
     }
