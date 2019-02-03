@@ -692,23 +692,6 @@ impl Default for Figure {
     }
 }
 
-/// Axis range
-#[derive(Clone, Copy)]
-pub enum Range {
-    /// Autoscale the axis
-    Auto,
-    /// Set the limits of the axis
-    Limits(f64, f64),
-}
-
-/// Labels attached to the tics of an axis
-pub struct TicLabels<P, L> {
-    /// Labels to attach to the tics
-    pub labels: L,
-    /// Position of the tics on the axis
-    pub positions: P,
-}
-
 /// Color
 #[allow(missing_docs)]
 #[derive(Clone, Copy)]
@@ -755,14 +738,6 @@ pub enum PointType {
     Star,
     Triangle,
     X,
-}
-
-/// Axis scale
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub enum Scale {
-    Linear,
-    Logarithmic,
 }
 
 /// Output terminal
