@@ -1,10 +1,10 @@
-# `criterion-plot`
+# `ploteria`
 
-> Graphing sub-crate of [Criterion.rs].
+This crate allows you to easily crate complex plots and graphs. Internally this crate uses
+[gnuplot] to perform the actual plotting.
 
-This is an unstable implementation detail of [Criterion.rs]. Anything may change
-at any time with no warning, including the public API. For further information,
-see [Criterion.rs].
+This crate was originally an implementation detail of [Criterion.rs], but it has since
+been forked into its own crate.
 
 ## License
 
@@ -30,6 +30,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
 be dual licensed as above, without any additional terms or conditions.
 
-[Code of Conduct]: https://www.rust-lang.org/en-US/conduct.html
+[gnuplot]: http://www.gnuplot.info/
 [Criterion.rs]: https://github.com/bheisler/criterion.rs
+[Code of Conduct]: https://www.rust-lang.org/en-US/conduct.html
 [contributing instructions]: CONTRIBUTING.md
