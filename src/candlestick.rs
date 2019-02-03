@@ -4,8 +4,8 @@ use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use data::Matrix;
-use traits::{self, Data, Set};
-use {Color, Default, Display, Figure, Label, LineType, LineWidth, Plot, Script};
+use traits::{self, Data};
+use {Color, Default, Display, Figure, LineType, Plot, Script};
 
 /// Properties common to candlestick plots
 pub struct Properties {
@@ -13,6 +13,44 @@ pub struct Properties {
     label: Option<Cow<'static, str>>,
     line_type: LineType,
     linewidth: Option<f64>,
+}
+
+impl Properties {
+    /// Sets the line color
+    pub fn color(&mut self, color: Color) -> &mut Properties {
+        self.color = Some(color);
+        self
+    }
+
+    /// Sets the legend label
+    pub fn label<S>(&mut self, label: S) -> &mut Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Changes the line type
+    ///
+    /// **Note** By default `Solid` lines are used
+    pub fn line_type(&mut self, lt: LineType) -> &mut Properties {
+        self.line_type = lt;
+        self
+    }
+
+    /// Changes the width of the line
+    ///
+    /// # Panics
+    ///
+    /// Panics if `width` is a non-positive value
+    pub fn line_width(&mut self, lw: f64) -> &mut Properties {
+        assert!(lw > 0.);
+
+        self.linewidth = Some(lw);
+        self
+    }
+
 }
 
 impl Default for Properties {
@@ -50,49 +88,9 @@ impl Script for Properties {
 
         script
     }
+
 }
 
-impl Set<Color> for Properties {
-    /// Sets the line color
-    fn set(&mut self, color: Color) -> &mut Properties {
-        self.color = Some(color);
-        self
-    }
-}
-
-impl Set<Label> for Properties {
-    /// Sets the legend label
-    fn set(&mut self, label: Label) -> &mut Properties {
-        self.label = Some(label.0);
-        self
-    }
-}
-
-impl Set<LineType> for Properties {
-    /// Changes the line type
-    ///
-    /// **Note** By default `Solid` lines are used
-    fn set(&mut self, lt: LineType) -> &mut Properties {
-        self.line_type = lt;
-        self
-    }
-}
-
-impl Set<LineWidth> for Properties {
-    /// Changes the width of the line
-    ///
-    /// # Panics
-    ///
-    /// Panics if `width` is a non-positive value
-    fn set(&mut self, lw: LineWidth) -> &mut Properties {
-        let lw = lw.0;
-
-        assert!(lw > 0.);
-
-        self.linewidth = Some(lw);
-        self
-    }
-}
 
 /// A candlestick consists of a box and two whiskers that extend beyond the box
 pub struct Candlesticks<X, WM, BM, BH, WH> {

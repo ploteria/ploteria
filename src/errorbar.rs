@@ -4,11 +4,8 @@ use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use data::Matrix;
-use traits::{self, Data, Set};
-use {
-    Color, Display, ErrorBarDefault, Figure, Label, LineType, LineWidth, Plot, PointSize,
-    PointType, Script,
-};
+use traits::{self, Data};
+use {Color, Display, ErrorBarDefault, Figure, LineType, Plot, PointType, Script};
 
 /// Properties common to error bar plots
 pub struct Properties {
@@ -19,6 +16,61 @@ pub struct Properties {
     point_size: Option<f64>,
     point_type: Option<PointType>,
     style: Style,
+}
+
+impl Properties {
+    /// Changes the color of the error bars
+    pub fn color(&mut self, color: Color) -> &mut Properties {
+        self.color = Some(color);
+        self
+    }
+
+    /// Sets the legend label
+    pub fn label<S>(&mut self, label: S) -> &mut Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Change the line type
+    ///
+    /// **Note** By default `Solid` lines are used
+    pub fn line_type(&mut self, lt: LineType) -> &mut Properties {
+        self.line_type = lt;
+        self
+    }
+
+    /// Changes the linewidth
+    ///
+    /// # Panics
+    ///
+    /// Panics if `lw` is a non-positive value
+    pub fn line_width(&mut self, lw: f64) -> &mut Properties {
+        assert!(lw > 0.);
+
+        self.linewidth = Some(lw);
+        self
+    }
+
+    /// Changes the size of the points
+    ///
+    /// # Panics
+    ///
+    /// Panics if `size` is a non-positive value
+    pub fn point_size(&mut self, ps: f64) -> &mut Properties {
+        assert!(ps > 0.);
+
+        self.point_size = Some(ps);
+        self
+    }
+
+    /// Changes the point type
+    pub fn point_type(&mut self, pt: PointType) -> &mut Properties {
+        self.point_type = Some(pt);
+        self
+    }
 }
 
 impl ErrorBarDefault<Style> for Properties {
@@ -69,71 +121,6 @@ impl Script for Properties {
     }
 }
 
-impl Set<Color> for Properties {
-    /// Changes the color of the error bars
-    fn set(&mut self, color: Color) -> &mut Properties {
-        self.color = Some(color);
-        self
-    }
-}
-
-impl Set<Label> for Properties {
-    /// Sets the legend label
-    fn set(&mut self, label: Label) -> &mut Properties {
-        self.label = Some(label.0);
-        self
-    }
-}
-
-impl Set<LineType> for Properties {
-    /// Change the line type
-    ///
-    /// **Note** By default `Solid` lines are used
-    fn set(&mut self, lt: LineType) -> &mut Properties {
-        self.line_type = lt;
-        self
-    }
-}
-
-impl Set<LineWidth> for Properties {
-    /// Changes the linewidth
-    ///
-    /// # Panics
-    ///
-    /// Panics if `lw` is a non-positive value
-    fn set(&mut self, lw: LineWidth) -> &mut Properties {
-        let lw = lw.0;
-
-        assert!(lw > 0.);
-
-        self.linewidth = Some(lw);
-        self
-    }
-}
-
-impl Set<PointSize> for Properties {
-    /// Changes the size of the points
-    ///
-    /// # Panics
-    ///
-    /// Panics if `size` is a non-positive value
-    fn set(&mut self, ps: PointSize) -> &mut Properties {
-        let ps = ps.0;
-
-        assert!(ps > 0.);
-
-        self.point_size = Some(ps);
-        self
-    }
-}
-
-impl Set<PointType> for Properties {
-    /// Changes the point type
-    fn set(&mut self, pt: PointType) -> &mut Properties {
-        self.point_type = Some(pt);
-        self
-    }
-}
 
 #[derive(Clone, Copy)]
 enum Style {

@@ -4,10 +4,9 @@ pub use candlestick::Candlesticks;
 pub use curve::Curve::{Dots, Impulses, Lines, LinesPoints, Points, Steps};
 pub use errorbar::ErrorBar::{XErrorBars, XErrorLines, YErrorBars, YErrorLines};
 pub use filledcurve::FilledCurve;
-pub use key::{Boxed, Horizontal, Justification, Order, Position, Stacked, Vertical};
-pub use proxy::{Font, Label, Output, Title};
-pub use traits::{Configure, Plot, Set};
+pub use key::{Horizontal, Justification, Order, Position, Stacked, Vertical};
+pub use traits::{Configure, Plot};
 pub use {
-    Axes, Axis, BoxWidth, Color, Figure, FontSize, Grid, Key, LineType, LineWidth, Opacity,
-    PointSize, PointType, Range, Scale, ScaleFactor, Size, Terminal, TicLabels,
+    Axes, Axis, Color, Figure, Grid, Key, LineType, PointType, Range, Scale, Terminal,
+    TicLabels,
 };

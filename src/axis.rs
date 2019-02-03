@@ -4,8 +4,8 @@ use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use map;
-use traits::{Configure, Data, Set};
-use {grid, Axis, Default, Display, Grid, Label, Range, Scale, ScaleFactor, Script, TicLabels};
+use traits::{Configure, Data};
+use {grid, Axis, Default, Display, Grid, Range, Scale, Script, TicLabels};
 
 /// Properties of the coordinate axes
 #[derive(Clone)]
@@ -49,7 +49,84 @@ impl Properties {
         self.hidden = false;
         self
     }
+
+    /// Attaches a label to the axis
+    pub fn label<S>(&mut self, label: S) -> &mut Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Changes the range of the axis that will be shown
+    ///
+    /// **Note** All axes are auto-scaled by default
+    pub fn range(&mut self, range: Range) -> &mut Properties {
+        self.hidden = false;
+
+        match range {
+            Range::Auto => self.range = None,
+            Range::Limits(low, high) => self.range = Some((low, high)),
+        }
+
+        self
+    }
+
+    /// Sets the scale of the axis
+    ///
+    /// **Note** All axes use a linear scale by default
+    pub fn scale(&mut self, scale: Scale) -> &mut Properties {
+        self.hidden = false;
+
+        match scale {
+            Scale::Linear => self.logarithmic = false,
+            Scale::Logarithmic => self.logarithmic = true,
+        }
+
+        self
+    }
+
+    /// Changes the *scale factor* of the axis.
+    ///
+    /// All the data plotted against this axis will have its corresponding coordinate
+    /// scaled with this factor before being plotted.
+    ///
+    /// **Note** The default scale factor is `1`.
+    pub fn scale_factor(&mut self, factor: f64) -> &mut Properties {
+        self.scale_factor = factor;
+
+        self
+    }
+
+    /// Attaches labels to the tics of an axis
+    pub fn tick_labels<P, L>(
+        &mut self, tics: TicLabels<P, L>
+    ) -> &mut Properties
+    where
+        L: IntoIterator,
+        L::Item: AsRef<str>,
+        P: IntoIterator,
+        P::Item: Data,
+    {
+        let TicLabels { positions, labels } = tics;
+
+        let pairs = positions
+            .into_iter()
+            .zip(labels.into_iter())
+            .map(|(pos, label)| format!("'{}' {}", label.as_ref(), pos.f64()))
+            .collect::<Vec<_>>();
+
+        if pairs.is_empty() {
+            self.tics = None
+        } else {
+            self.tics = Some(pairs.join(", "));
+        }
+
+        self
+    }
 }
+
 
 impl Configure<Grid> for Properties {
     type Properties = grid::Properties;
@@ -65,87 +142,6 @@ impl Configure<Grid> for Properties {
             let mut properties = Default::default();
             configure(&mut properties);
             self.grids.insert(grid, properties);
-        }
-
-        self
-    }
-}
-
-impl Set<Label> for Properties {
-    /// Attaches a label to the axis
-    fn set(&mut self, label: Label) -> &mut Properties {
-        self.label = Some(label.0);
-        self
-    }
-}
-
-impl Set<Range> for Properties {
-    /// Changes the range of the axis that will be shown
-    ///
-    /// **Note** All axes are auto-scaled by default
-    fn set(&mut self, range: Range) -> &mut Properties {
-        self.hidden = false;
-
-        match range {
-            Range::Auto => self.range = None,
-            Range::Limits(low, high) => self.range = Some((low, high)),
-        }
-
-        self
-    }
-}
-
-impl Set<Scale> for Properties {
-    /// Sets the scale of the axis
-    ///
-    /// **Note** All axes use a linear scale by default
-    fn set(&mut self, scale: Scale) -> &mut Properties {
-        self.hidden = false;
-
-        match scale {
-            Scale::Linear => self.logarithmic = false,
-            Scale::Logarithmic => self.logarithmic = true,
-        }
-
-        self
-    }
-}
-
-impl Set<ScaleFactor> for Properties {
-    /// Changes the *scale factor* of the axis.
-    ///
-    /// All the data plotted against this axis will have its corresponding coordinate scaled with
-    /// this factor before being plotted.
-    ///
-    /// **Note** The default scale factor is `1`.
-    fn set(&mut self, factor: ScaleFactor) -> &mut Properties {
-        self.scale_factor = factor.0;
-
-        self
-    }
-}
-
-impl<P, L> Set<TicLabels<P, L>> for Properties
-where
-    L: IntoIterator,
-    L::Item: AsRef<str>,
-    P: IntoIterator,
-    P::Item: Data,
-{
-    /// Attaches labels to the tics of an axis
-    fn set(&mut self, tics: TicLabels<P, L>) -> &mut Properties {
-        let TicLabels { positions, labels } = tics;
-
-        let pairs = positions
-            .into_iter()
-            .zip(labels.into_iter())
-            .map(|(pos, label)| format!("'{}' {}", label.as_ref(), pos.f64()))
-            .collect::<Vec<_>>();
-
-        if pairs.is_empty() {
-            self.tics = None
-        } else {
-            self.tics = Some(pairs.join(", "));
         }
 
         self

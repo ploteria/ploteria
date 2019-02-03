@@ -4,8 +4,8 @@ use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use data::Matrix;
-use traits::{self, Data, Set};
-use {Axes, Color, Default, Display, Figure, Label, Opacity, Plot, Script};
+use traits::{self, Data};
+use {Axes, Color, Default, Display, Figure, Plot, Script};
 
 /// Properties common to filled curve plots
 pub struct Properties {
@@ -13,6 +13,44 @@ pub struct Properties {
     color: Option<Color>,
     label: Option<Cow<'static, str>>,
     opacity: Option<f64>,
+}
+
+impl Properties {
+    /// Select axes to plot against
+    ///
+    /// **Note** By default, the `BottomXLeftY` axes are used
+    pub fn axes(&mut self, axes: Axes) -> &mut Properties {
+        self.axes = Some(axes);
+        self
+    }
+
+    /// Sets the fill color
+    pub fn color(&mut self, color: Color) -> &mut Properties {
+        self.color = Some(color);
+        self
+    }
+
+    /// Sets the legend label
+    pub fn label<S>(&mut self, label: S) -> &mut Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Changes the opacity of the fill color
+    ///
+    /// **Note** By default, the fill color is totally opaque (`opacity = 1.0`)
+    ///
+    /// # Panics
+    ///
+    /// Panics if `opacity` is outside the range `[0, 1]`
+    pub fn opacity(&mut self, opacity: f64) -> &mut Properties {
+        self.opacity = Some(opacity);
+        self
+    }
+
 }
 
 impl Default for Properties {
@@ -57,46 +95,6 @@ impl Script for Properties {
         }
 
         script
-    }
-}
-
-impl Set<Axes> for Properties {
-    /// Select axes to plot against
-    ///
-    /// **Note** By default, the `BottomXLeftY` axes are used
-    fn set(&mut self, axes: Axes) -> &mut Properties {
-        self.axes = Some(axes);
-        self
-    }
-}
-
-impl Set<Color> for Properties {
-    /// Sets the fill color
-    fn set(&mut self, color: Color) -> &mut Properties {
-        self.color = Some(color);
-        self
-    }
-}
-
-impl Set<Label> for Properties {
-    /// Sets the legend label
-    fn set(&mut self, label: Label) -> &mut Properties {
-        self.label = Some(label.0);
-        self
-    }
-}
-
-impl Set<Opacity> for Properties {
-    /// Changes the opacity of the fill color
-    ///
-    /// **Note** By default, the fill color is totally opaque (`opacity = 1.0`)
-    ///
-    /// # Panics
-    ///
-    /// Panics if `opacity` is outside the range `[0, 1]`
-    fn set(&mut self, opacity: Opacity) -> &mut Properties {
-        self.opacity = Some(opacity.0);
-        self
     }
 }
 

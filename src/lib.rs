@@ -29,41 +29,41 @@
 //! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
-//! #   .set(Font("Helvetica"))
-//! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/ploteria/curve.svg")))
-//! #   .set(Size(1280, 720))
+//! #   .font("Helvetica")
+//! #   .font_size(12.)
+//! #   .output(Path::new("target/doc/ploteria/curve.svg"))
+//! #   .figure_size(1280, 720)
 //!     .configure(Key, |k| {
-//!         k.set(Boxed::Yes)
-//!          .set(Position::Inside(Vertical::Top, Horizontal::Left))
+//!         k.boxed(true)
+//!          .position(Position::Inside(Vertical::Top, Horizontal::Left))
 //!     })
 //!     .plot(LinesPoints {
 //!               x: xs,
 //!               y: xs.iter().map(|x| x.sin()),
 //!           },
 //!           |lp| {
-//!               lp.set(Color::DarkViolet)
-//!                 .set(Label("sin(x)"))
-//!                 .set(LineType::Dash)
-//!                 .set(PointSize(1.5))
-//!                 .set(PointType::Circle)
+//!               lp.color(Color::DarkViolet)
+//!                 .label("sin(x)")
+//!                 .line_type(LineType::Dash)
+//!                 .point_size(1.5)
+//!                 .point_type(PointType::Circle)
 //!           })
 //!     .plot(Steps {
 //!               x: xs,
 //!               y: xs.iter().map(|x| x.atan()),
 //!           },
 //!           |s| {
-//!               s.set(Color::Rgb(0, 158, 115))
-//!                .set(Label("atan(x)"))
-//!                .set(LineWidth(2.))
+//!               s.color(Color::Rgb(0, 158, 115))
+//!                .label("atan(x)")
+//!                .line_width(2.)
 //!           })
 //!     .plot(Impulses {
 //!               x: xs,
 //!               y: xs.iter().map(|x| x.atan().cos()),
 //!           },
 //!           |i| {
-//!               i.set(Color::Rgb(86, 180, 233))
-//!                .set(Label("cos(atan(x))"))
+//!               i.color(Color::Rgb(86, 180, 233))
+//!                .label("cos(atan(x))")
 //!           })
 //!     .draw()  // (rest of the chain has been omitted)
 //! #   .ok()
@@ -118,26 +118,26 @@
 //! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
-//! #   .set(Font("Helvetica"))
-//! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/ploteria/error_bar.svg")))
-//! #   .set(Size(1280, 720))
+//! #   .font("Helvetica")
+//! #   .font_size(12.)
+//! #   .output(Path::new("target/doc/ploteria/error_bar.svg"))
+//! #   .figure_size(1280, 720)
 //!     .configure(Axis::BottomX, |a| {
-//!         a.set(TicLabels {
+//!         a.tick_labels(TicLabels {
 //!             labels: &["-π", "0", "π"],
 //!             positions: &[-PI, 0., PI],
 //!         })
 //!     })
 //!     .configure(Key,
-//!                |k| k.set(Position::Outside(Vertical::Top, Horizontal::Right)))
+//!                |k| k.position(Position::Outside(Vertical::Top, Horizontal::Right)))
 //!     .plot(Lines {
 //!               x: xs_,
 //!               y: xs_.iter().cloned().map(sinc),
 //!           },
 //!           |l| {
-//!               l.set(Color::Rgb(0, 158, 115))
-//!                .set(Label("sinc(x)"))
-//!                .set(LineWidth(2.))
+//!               l.color(Color::Rgb(0, 158, 115))
+//!                .label("sinc(x)")
+//!                .line_width(2.)
 //!           })
 //!     .plot(YErrorBars {
 //!               x: xs,
@@ -146,10 +146,10 @@
 //!               y_high: &y_high,
 //!           },
 //!           |eb| {
-//!               eb.set(Color::DarkViolet)
-//!                 .set(LineWidth(2.))
-//!                 .set(PointType::FilledCircle)
-//!                 .set(Label("measured"))
+//!               eb.color(Color::DarkViolet)
+//!                 .line_width(2.)
+//!                 .point_type(PointType::FilledCircle)
+//!                 .label("measured")
 //!           })
 //!     .draw()  // (rest of the chain has been omitted)
 //! #   .ok()
@@ -191,12 +191,12 @@
 //! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
-//! #   .set(Font("Helvetica"))
-//! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/ploteria/candlesticks.svg")))
-//! #   .set(Size(1280, 720))
-//!     .set(BoxWidth(0.2))
-//!     .configure(Axis::BottomX, |a| a.set(Range::Limits(0., 11.)))
+//! #   .font("Helvetica")
+//! #   .font_size(12.)
+//! #   .output(Path::new("target/doc/ploteria/candlesticks.svg"))
+//! #   .figure_size(1280, 720)
+//!     .box_width(0.2)
+//!     .configure(Axis::BottomX, |a| a.range(Range::Limits(0., 11.)))
 //!     .plot(Candlesticks {
 //!               x: xs.clone(),
 //!               whisker_min: &wm,
@@ -205,9 +205,9 @@
 //!               whisker_high: &wh,
 //!           },
 //!           |cs| {
-//!               cs.set(Color::Rgb(86, 180, 233))
-//!                 .set(Label("Quartiles"))
-//!                 .set(LineWidth(2.))
+//!               cs.color(Color::Rgb(86, 180, 233))
+//!                 .label("Quartiles")
+//!                 .line_width(2.)
 //!           })
 //!     // trick to plot the median
 //!     .plot(Candlesticks {
@@ -218,8 +218,8 @@
 //!               whisker_high: &m,
 //!           },
 //!           |cs| {
-//!               cs.set(Color::Black)
-//!                 .set(LineWidth(2.))
+//!               cs.color(Color::Black)
+//!                 .line_width(2.)
 //!           })
 //!     .draw()  // (rest of the chain has been omitted)
 //! #   .ok()
@@ -261,45 +261,45 @@
 //!
 //! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
-//! Figure::new().
-//! #   set(Font("Helvetica")).
-//! #   set(FontSize(12.)).
-//! #   set(Output(Path::new("target/doc/ploteria/multiaxis.svg"))).
-//! #   set(Size(1280, 720)).
-//!     set(Title("Frequency response")).
-//!     configure(Axis::BottomX, |a| a.
-//!         configure(Grid::Major, |g| g.
-//!             show()).
-//!         set(Label("Angular frequency (rad/s)")).
-//!         set(Range::Limits(start, end)).
-//!         set(Scale::Logarithmic)).
-//!     configure(Axis::LeftY, |a| a.
-//!         set(Label("Gain")).
-//!         set(Scale::Logarithmic)).
-//!     configure(Axis::RightY, |a| a.
-//!         configure(Grid::Major, |g| g.
-//!             show()).
-//!         set(Label("Phase shift (°)"))).
-//!     configure(Key, |k| k.
-//!         set(Position::Inside(Vertical::Top, Horizontal::Center)).
-//!         set(Title(" "))).
-//!     plot(Lines {
+//! Figure::new()
+//! #   .font("Helvetica")
+//! #   .font_size(12.)
+//! #   .output(Path::new("target/doc/ploteria/multiaxis.svg"))
+//! #   .figure_size(1280, 720)
+//!     .title("Frequency response")
+//!     .configure(Axis::BottomX, |a| a
+//!         .configure(Grid::Major, |g| g
+//!             .show())
+//!         .label("Angular frequency (rad/s)")
+//!         .range(Range::Limits(start, end))
+//!         .scale(Scale::Logarithmic))
+//!     .configure(Axis::LeftY, |a| a
+//!         .label("Gain")
+//!         .scale(Scale::Logarithmic))
+//!     .configure(Axis::RightY, |a| a
+//!         .configure(Grid::Major, |g| g
+//!             .show())
+//!         .label("Phase shift (°)"))
+//!     .configure(Key, |k| k
+//!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
+//!         .title(" "))
+//!     .plot(Lines {
 //!         x: xs,
 //!         y: magnitude,
-//!     }, |l| l.
-//!         set(Color::DarkViolet).
-//!         set(Label("Magnitude")).
-//!         set(LineWidth(2.))).
-//!     plot(Lines {
+//!     }, |l| l
+//!         .color(Color::DarkViolet)
+//!         .label("Magnitude")
+//!         .line_width(2.))
+//!     .plot(Lines {
 //!         x: xs,
 //!         y: phase,
-//!     }, |l| l.
-//!         set(Axes::BottomXRightY).
-//!         set(Color::Rgb(0, 158, 115)).
-//!         set(Label("Phase")).
-//!         set(LineWidth(2.))).
-//!     draw().  // (rest of the chain has been omitted)
-//! #   ok().and_then(|gnuplot| {
+//!     }, |l| l
+//!         .axes(Axes::BottomXRightY)
+//!         .color(Color::Rgb(0, 158, 115))
+//!         .label("Phase")
+//!         .line_width(2.))
+//!     .draw()  // (rest of the chain has been omitted)
+//! #   .ok().and_then(|gnuplot| {
 //! #       gnuplot.wait_with_output().ok().and_then(|p| {
 //! #           String::from_utf8(p.stderr).ok()
 //! #       })
@@ -338,18 +338,18 @@
 //! # fs::create_dir_all(Path::new("target/doc/ploteria")).unwrap();
 //! # assert_eq!(Some(String::new()),
 //! Figure::new()
-//! #   .set(Font("Helvetica"))
-//! #   .set(FontSize(12.))
-//! #   .set(Output(Path::new("target/doc/ploteria/filled_curve.svg")))
-//! #   .set(Size(1280, 720))
-//!     .set(Title("Transparent filled curve"))
-//!     .configure(Axis::BottomX, |a| a.set(Range::Limits(start, end)))
-//!     .configure(Axis::LeftY, |a| a.set(Range::Limits(0., 1.)))
+//! #   .font("Helvetica")
+//! #   .font_size(12.)
+//! #   .output(Path::new("target/doc/ploteria/filled_curve.svg"))
+//! #   .figure_size(1280, 720)
+//!     .title("Transparent filled curve")
+//!     .configure(Axis::BottomX, |a| a.range(Range::Limits(start, end)))
+//!     .configure(Axis::LeftY, |a| a.range(Range::Limits(0., 1.)))
 //!     .configure(Key, |k| {
-//!         k.set(Justification::Left)
-//!          .set(Order::SampleText)
-//!          .set(Position::Inside(Vertical::Top, Horizontal::Left))
-//!          .set(Title("Gaussian Distribution"))
+//!         k.justification(Justification::Left)
+//!          .order(Order::SampleText)
+//!          .position(Position::Inside(Vertical::Top, Horizontal::Left))
+//!          .title("Gaussian Distribution")
 //!     })
 //!     .plot(FilledCurve {
 //!               x: xs,
@@ -357,8 +357,8 @@
 //!               y2: zeros.clone(),
 //!           },
 //!           |fc| {
-//!               fc.set(Color::ForestGreen)
-//!                 .set(Label("μ = 0.5 σ = 0.5"))
+//!               fc.color(Color::ForestGreen)
+//!                 .label("μ = 0.5 σ = 0.5")
 //!           })
 //!     .plot(FilledCurve {
 //!               x: xs,
@@ -366,9 +366,9 @@
 //!               y2: zeros.clone(),
 //!           },
 //!           |fc| {
-//!               fc.set(Color::Gold)
-//!                 .set(Label("μ = 2.0 σ = 1.0"))
-//!                 .set(Opacity(0.5))
+//!               fc.color(Color::Gold)
+//!                 .label("μ = 2.0 σ = 1.0")
+//!                 .opacity(0.5)
 //!           })
 //!     .plot(FilledCurve {
 //!               x: xs,
@@ -376,9 +376,9 @@
 //!               y2: zeros,
 //!           },
 //!           |fc| {
-//!               fc.set(Color::Red)
-//!                 .set(Label("μ = -1.0 σ = 2.0"))
-//!                 .set(Opacity(0.5))
+//!               fc.color(Color::Red)
+//!                 .label("μ = -1.0 σ = 2.0")
+//!                 .opacity(0.5)
 //!           })
 //!     .draw()
 //!     .ok()
@@ -412,7 +412,7 @@ use std::process::{Child, Command};
 use std::str;
 
 use data::Matrix;
-use traits::{Configure, Set};
+use traits::Configure;
 
 mod data;
 mod display;
@@ -426,7 +426,6 @@ pub mod filledcurve;
 pub mod grid;
 pub mod key;
 pub mod prelude;
-pub mod proxy;
 pub mod traits;
 
 /// Plot container
@@ -463,6 +462,69 @@ impl Figure {
             tics: map::axis::Map::new(),
             title: None,
         }
+    }
+
+    /// Changes the box width of all the box related plots (bars, candlesticks, etc)
+    ///
+    /// **Note** The default value is 0
+    ///
+    /// # Panics
+    ///
+    /// Panics if `width` is a negative value
+    pub fn box_width(&mut self, width: f64) -> &mut Figure {
+        assert!(width >= 0.);
+
+        self.box_width = Some(width);
+        self
+    }
+    /// Changes the font
+    pub fn font<S>(&mut self, font: S) -> &mut Figure
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.font = Some(font.into());
+        self
+    }
+    /// Changes the size of the font
+    ///
+    /// # Panics
+    ///
+    /// Panics if `size` is a non-positive value
+    pub fn font_size(&mut self, size: f64) -> &mut Figure {
+        assert!(size >= 0.);
+
+        self.font_size = Some(size);
+        self
+    }
+    /// Changes the output file
+    ///
+    /// **Note** The default output file is `output.plot`
+    pub fn output<S>(&mut self, output: S) -> &mut Figure
+    where
+        S: Into<Cow<'static, Path>>,
+    {
+        self.output = output.into();
+        self
+    }
+    /// Changes the figure size
+    pub fn figure_size(&mut self, width: usize, height: usize) -> &mut Figure {
+        self.size = Some((width, height));
+        self
+    }
+    /// Changes the output terminal
+    ///
+    /// **Note** By default, the terminal is set to `Svg`
+    pub fn terminal(&mut self, terminal: Terminal) -> &mut Figure {
+        self.terminal = terminal;
+        self
+    }
+    /// Sets the title
+    pub fn title<S>(&mut self, title: S) -> &mut Figure
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.title = Some(title.into());
+        self
     }
 
     fn script(&self) -> Vec<u8> {
@@ -629,83 +691,6 @@ impl Configure<Key> for Figure {
     }
 }
 
-impl Set<BoxWidth> for Figure {
-    /// Changes the box width of all the box related plots (bars, candlesticks, etc)
-    ///
-    /// **Note** The default value is 0
-    ///
-    /// # Panics
-    ///
-    /// Panics if `width` is a negative value
-    fn set(&mut self, width: BoxWidth) -> &mut Figure {
-        let width = width.0;
-
-        assert!(width >= 0.);
-
-        self.box_width = Some(width);
-        self
-    }
-}
-
-impl Set<Font> for Figure {
-    /// Changes the font
-    fn set(&mut self, font: Font) -> &mut Figure {
-        self.font = Some(font.0);
-        self
-    }
-}
-
-impl Set<FontSize> for Figure {
-    /// Changes the size of the font
-    ///
-    /// # Panics
-    ///
-    /// Panics if `size` is a non-positive value
-    fn set(&mut self, size: FontSize) -> &mut Figure {
-        let size = size.0;
-
-        assert!(size >= 0.);
-
-        self.font_size = Some(size);
-        self
-    }
-}
-
-impl Set<Output> for Figure {
-    /// Changes the output file
-    ///
-    /// **Note** The default output file is `output.plot`
-    fn set(&mut self, output: Output) -> &mut Figure {
-        self.output = output.0;
-        self
-    }
-}
-
-impl Set<Size> for Figure {
-    /// Changes the figure size
-    fn set(&mut self, size: Size) -> &mut Figure {
-        self.size = Some((size.0, size.1));
-        self
-    }
-}
-
-impl Set<Terminal> for Figure {
-    /// Changes the output terminal
-    ///
-    /// **Note** By default, the terminal is set to `Svg`
-    fn set(&mut self, terminal: Terminal) -> &mut Figure {
-        self.terminal = terminal;
-        self
-    }
-}
-
-impl Set<Title> for Figure {
-    /// Sets the title
-    fn set(&mut self, title: Title) -> &mut Figure {
-        self.title = Some(title.0);
-        self
-    }
-}
 
 impl Default for Figure {
     fn default() -> Self {
@@ -713,38 +698,9 @@ impl Default for Figure {
     }
 }
 
-/// Box width for box-related plots: bars, candlesticks, etc
-#[derive(Clone, Copy)]
-pub struct BoxWidth(pub f64);
-
-/// A font name
-pub struct Font(Cow<'static, str>);
-
-/// The size of a font
-#[derive(Clone, Copy)]
-pub struct FontSize(pub f64);
-
 /// The key or legend
 #[derive(Clone, Copy)]
 pub struct Key;
-
-/// Plot label
-pub struct Label(Cow<'static, str>);
-
-/// Width of the lines
-#[derive(Clone, Copy)]
-pub struct LineWidth(pub f64);
-
-/// Fill color opacity
-#[derive(Clone, Copy)]
-pub struct Opacity(pub f64);
-
-/// Output file path
-pub struct Output(Cow<'static, Path>);
-
-/// Size of the points
-#[derive(Clone, Copy)]
-pub struct PointSize(pub f64);
 
 /// Axis range
 #[derive(Clone, Copy)]
@@ -755,10 +711,6 @@ pub enum Range {
     Limits(f64, f64),
 }
 
-/// Figure size
-#[derive(Clone, Copy)]
-pub struct Size(pub usize, pub usize);
-
 /// Labels attached to the tics of an axis
 pub struct TicLabels<P, L> {
     /// Labels to attach to the tics
@@ -766,9 +718,6 @@ pub struct TicLabels<P, L> {
     /// Position of the tics on the axis
     pub positions: P,
 }
-
-/// Figure title
-pub struct Title(Cow<'static, str>);
 
 /// A pair of axes that define a coordinate system
 #[allow(missing_docs)]
@@ -881,11 +830,6 @@ pub enum Scale {
     Linear,
     Logarithmic,
 }
-
-/// Axis scale factor
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub struct ScaleFactor(pub f64);
 
 /// Output terminal
 #[allow(missing_docs)]
