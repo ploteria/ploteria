@@ -424,7 +424,7 @@ pub mod key;
 pub mod prelude;
 pub mod traits;
 
-use axis::{Axes, AxisProperties, Axis};
+use axis::{Axes, Axis, AxisProperties};
 use key::KeyProperties;
 
 /// Plot container
@@ -653,7 +653,9 @@ impl Figure {
 
     /// Configures an axis.
     pub fn configure_axis<F: FnOnce(&mut AxisProperties) -> &mut AxisProperties>(
-        &mut self, axis: Axis, configure: F
+        &mut self,
+        axis: Axis,
+        configure: F,
     ) -> &mut Figure {
         if self.axes.contains_key(axis) {
             configure(self.axes.get_mut(axis).unwrap());
@@ -667,17 +669,18 @@ impl Figure {
 
     /// Configures the key (legend).
     pub fn configure_key<F: FnOnce(&mut KeyProperties) -> &mut KeyProperties>(
-        &mut self, configure: F
+        &mut self,
+        configure: F,
     ) -> &mut Figure {
         match self.key {
             Some(ref mut key) => {
                 configure(key);
-            },
+            }
             None => {
                 let mut key = Default::default();
                 configure(&mut key);
                 self.key = Some(key);
-            },
+            }
         }
         self
     }

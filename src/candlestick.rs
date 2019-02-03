@@ -50,7 +50,6 @@ impl Properties {
         self.linewidth = Some(lw);
         self
     }
-
 }
 
 impl Default for Properties {
@@ -88,9 +87,7 @@ impl Script for Properties {
 
         script
     }
-
 }
-
 
 /// A candlestick consists of a box and two whiskers that extend beyond the box
 pub struct Candlesticks<X, WM, BM, BH, WH> {

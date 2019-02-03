@@ -141,7 +141,6 @@ impl Script for KeyProperties {
         script.push('\n');
         script
     }
-
 }
 
 /// Horizontal position of the key

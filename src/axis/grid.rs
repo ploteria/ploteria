@@ -19,7 +19,7 @@ impl Gridline {
     pub(crate) fn new(is_minor: bool) -> Gridline {
         Gridline {
             is_minor,
-            hidden: true
+            hidden: true,
         }
     }
 

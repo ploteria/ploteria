@@ -136,7 +136,6 @@ impl Script for Properties {
     }
 }
 
-
 /// Types of "curve" plots
 pub enum Curve<X, Y> {
     /// A minimally sized dot on each data point

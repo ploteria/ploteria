@@ -50,7 +50,6 @@ impl Properties {
         self.opacity = Some(opacity);
         self
     }
-
 }
 
 impl Default for Properties {

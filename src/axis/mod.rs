@@ -144,9 +144,7 @@ impl AxisProperties {
     }
 
     /// Attaches labels to the tics of an axis
-    pub fn tick_labels<P, L>(
-        &mut self, tics: TicLabels<P, L>
-    ) -> &mut AxisProperties
+    pub fn tick_labels<P, L>(&mut self, tics: TicLabels<P, L>) -> &mut AxisProperties
     where
         L: IntoIterator,
         L::Item: AsRef<str>,
@@ -172,7 +170,8 @@ impl AxisProperties {
 
     /// Configure the major grid. These grid lines are places on the major tic marks.
     pub fn configure_major_grid<F: FnOnce(&mut Gridline) -> &mut Gridline>(
-        &mut self, configure: F
+        &mut self,
+        configure: F,
     ) -> &mut AxisProperties {
         configure(&mut self.major_grid);
         self
@@ -180,14 +179,13 @@ impl AxisProperties {
 
     /// Configure the minor grid. These grid lines are places on the minor tic marks.
     pub fn configure_minor_grid<F: FnOnce(&mut Gridline) -> &mut Gridline>(
-        &mut self, configure: F
+        &mut self,
+        configure: F,
     ) -> &mut AxisProperties {
         configure(&mut self.minor_grid);
         self
     }
 }
-
-
 
 impl<'a> Script for (Axis, &'a AxisProperties) {
     fn script(&self) -> String {
