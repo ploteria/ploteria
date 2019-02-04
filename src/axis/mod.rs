@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use traits::Data;
-use {Default, Display, Range, Scale, Script, TicLabels};
+use {Default, Display, Script};
 
 /// A coordinate axis
 #[derive(Clone, Copy)]
@@ -22,16 +22,6 @@ pub enum Axis {
     TopX,
 }
 
-/// A pair of axes that define a coordinate system.
-#[allow(missing_docs)]
-#[derive(Clone, Copy)]
-pub enum Axes {
-    BottomXLeftY,
-    BottomXRightY,
-    TopXLeftY,
-    TopXRightY,
-}
-
 impl Axis {
     pub(crate) fn next(self) -> Option<Axis> {
         use Axis::*;
@@ -43,6 +33,49 @@ impl Axis {
             TopX => None,
         }
     }
+}
+
+/// A pair of axes that define a coordinate system.
+#[allow(missing_docs)]
+#[derive(Clone, Copy)]
+pub enum Axes {
+    BottomXLeftY,
+    BottomXRightY,
+    TopXLeftY,
+    TopXRightY,
+}
+
+/// Axis range
+///
+/// Used by [`AxisProperties::range`].
+///
+/// [`AxisProperties::range`]: struct.AxisProperties.html#method.range
+#[derive(Clone, Copy)]
+pub enum Range {
+    /// Autoscale the axis
+    Auto,
+    /// Set the limits of the axis
+    Limits(f64, f64),
+}
+
+/// Axis scale.
+///
+/// Used by [`AxisProperties::scale`].
+///
+/// [`AxisProperties::scale`]: struct.AxisProperties.html#method.scale
+#[allow(missing_docs)]
+#[derive(Clone, Copy)]
+pub enum Scale {
+    Linear,
+    Logarithmic,
+}
+
+/// Labels attached to the tics of an axis
+pub struct TicLabels<P, L> {
+    /// Labels to attach to the tics
+    pub labels: L,
+    /// Position of the tics on the axis
+    pub positions: P,
 }
 
 /// Properties of the coordinate axes.
