@@ -19,7 +19,6 @@ To make changes to the code, fork the repo and clone it:
 git clone git@github.com:your-username/ploteria.git
 ```
 
-
 You'll probably want to install [gnuplot] as well. See the gnuplot website for
 installation instructions.
 
