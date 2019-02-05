@@ -3,6 +3,7 @@
 pub mod grid;
 
 use std::default::Default;
+use std::borrow::Cow;
 use std::iter::IntoIterator;
 
 use crate::axis::grid::Gridline;
@@ -109,7 +110,7 @@ pub struct AxisProperties {
     pub major_grid: Gridline,
     pub minor_grid: Gridline,
     hidden: bool,
-    pub label: Option<&'static str>,
+    pub label: Option<Cow<'static, str>>,
     logarithmic: bool,
     pub range: Option<(f64, f64)>,
     pub scale_factor: f64,
@@ -148,11 +149,15 @@ impl AxisProperties {
         self
     }
 
-    /// Attaches a label to the axis
-    pub fn label(mut self, label: &'static str) -> AxisProperties {
-        self.label = Some(label);
+    /// Sets the legend label
+    pub fn label<S>(mut self, label: S) -> AxisProperties
+        where
+            S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
         self
     }
+
 
     /// Changes the range of the axis that will be shown
     ///

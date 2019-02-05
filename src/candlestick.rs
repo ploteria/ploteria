@@ -2,7 +2,7 @@
 
 use std::iter::IntoIterator;
 use std::{default::Default, fmt::Debug};
-
+use std::borrow::Cow;
 use itertools::izip;
 
 use crate::data::Matrix;
@@ -13,7 +13,7 @@ use crate::{scale_factor, Axes, Color, Figure, LineType, Plot, Script};
 #[derive(Debug, Default)]
 pub struct Properties {
     color: Option<Color>,
-    label: Option<&'static str>,
+    label: Option<Cow<'static, str>>,
     line_type: LineType,
     line_width: Option<f64>,
 }
@@ -25,9 +25,12 @@ impl Properties {
         self
     }
 
-    pub fn label(mut self, label: &'static str) -> Properties {
-        self.label = Some(label);
-
+    /// Sets the legend label
+    pub fn label<S>(mut self, label: S) -> Properties
+    where
+        S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
         self
     }
 

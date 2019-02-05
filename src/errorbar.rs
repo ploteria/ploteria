@@ -2,6 +2,7 @@
 
 use std::fmt::Debug;
 use std::iter::IntoIterator;
+use std::borrow::Cow;
 
 use crate::data::Matrix;
 use crate::traits::{Data, Plot as PlotTrait};
@@ -13,7 +14,7 @@ use itertools::izip;
 #[derive(Clone, Debug)]
 pub struct Properties {
     color: Option<Color>,
-    label: Option<&'static str>,
+    label: Option<Cow<'static, str>>,
     line_type: LineType,
     linewidth: Option<f64>,
     point_size: Option<f64>,
@@ -29,8 +30,11 @@ impl Properties {
     }
 
     /// Sets the legend label
-    pub fn label(mut self, label: &'static str) -> Properties {
-        self.label = Some(label);
+    pub fn label<S>(mut self, label: S) -> Properties
+        where
+            S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
         self
     }
 

@@ -3,6 +3,7 @@
 use itertools::izip;
 use std::fmt::Debug;
 use std::iter::IntoIterator;
+use std::borrow::Cow;
 
 use crate::data::Matrix;
 use crate::traits::{Data, Plot as PlotTrait};
@@ -13,7 +14,7 @@ use crate::{scale_factor, Axes, Color, Figure, Plot, Script};
 pub struct Properties {
     axes: Option<Axes>,
     color: Option<Color>,
-    label: Option<&'static str>,
+    label: Option<Cow<'static, str>>,
     opacity: Option<f64>,
 }
 
@@ -33,10 +34,14 @@ impl Properties {
     }
 
     /// Sets the legend label
-    pub fn label(mut self, label: &'static str) -> Properties {
-        self.label = Some(label);
+    pub fn label<S>(mut self, label: S) -> Properties
+        where
+            S: Into<Cow<'static, str>>,
+    {
+        self.label = Some(label.into());
         self
     }
+
 
     /// Changes the opacity of the fill color
     ///
