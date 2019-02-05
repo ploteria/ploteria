@@ -397,7 +397,7 @@ use std::str;
 use std::{default::Default, error::Error};
 
 use crate::data::Matrix;
-use crate::{key::KeyProperties, map::axis::Map};
+use crate::{key::KeyProperties, map::Map};
 mod data;
 pub mod map;
 use crate::axis::{Axes, Axis, AxisProperties};
@@ -441,7 +441,7 @@ impl Figure {
             plots: Vec::new(),
             size: None,
             terminal: Terminal::Svg,
-            tics: map::axis::Map::new(),
+            tics: Map::new(),
             title: None,
         }
     }
@@ -726,7 +726,7 @@ pub enum Grid {
 }
 
 impl Grid {
-    fn next(self) -> Option<Grid> {
+    pub fn next(self) -> Option<Grid> {
         match self {
             Grid::Major => Some(Grid::Minor),
             Grid::Minor => None,
