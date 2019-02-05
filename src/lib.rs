@@ -12,16 +12,13 @@
 //! ![Plot](curve.svg)
 //!
 //! ```
-//! extern crate itertools_num;
-//! extern crate ploteria as plot;
-//!
 //! # use std::fs;
 //! # use std::path::Path;
 //! use itertools_num::linspace;
-//! use plot::prelude::*;
+//! use ploteria::prelude::*;
 //!
 //! # fn main() {
-//! # if let Err(_) = plot::version() {
+//! # if let Err(_) = ploteria::version() {
 //! #     return;
 //! # }
 //! let ref xs = linspace::<f64>(-10., 10., 51).collect::<Vec<_>>();
@@ -34,7 +31,7 @@
 //! #   .output(Path::new("target/doc/ploteria/curve.svg"))
 //! #   .figure_size(1280, 720)
 //!     .configure_key(|k| {
-//!         k.boxed(true)
+//!         k.boxed(Boxed::Yes)
 //!          .position(Position::Inside(Vertical::Top, Horizontal::Left))
 //!     })
 //!     .plot(LinesPoints {
@@ -90,6 +87,7 @@
 //! use itertools_num::linspace;
 //! use rand::{Rng, XorShiftRng};
 //! use plot::prelude::*;
+//! use ploteria::axis::TicLabels;
 //!
 //! fn sinc(mut x: f64) -> f64 {
 //!     if x == 0. {
@@ -165,16 +163,14 @@
 //! ![Plot](candlesticks.svg)
 //!
 //! ```
-//! extern crate rand;
-//! extern crate ploteria as plot;
-//!
 //! # use std::fs;
 //! # use std::path::Path;
-//! use plot::prelude::*;
+//! use ploteria::prelude::*;
 //! use rand::Rng;
+//! use ploteria::{version, axis::Range};
 //!
 //! # fn main() {
-//! # if let Err(_) = plot::version() {
+//! # if let Err(_) = version() {
 //! #     return;
 //! # }
 //! let xs = 1..11;
@@ -234,9 +230,6 @@
 //! ![Plot](multiaxis.svg)
 //!
 //! ```
-//! extern crate itertools_num;
-//! extern crate num_complex;
-//! extern crate ploteria as plot;
 //!
 //! # use std::fs;
 //! # use std::path::Path;
@@ -244,14 +237,16 @@
 //!
 //! use itertools_num::linspace;
 //! use num_complex::Complex;
-//! use plot::prelude::*;
+//! use ploteria::prelude::*;
+//! use ploteria::axis::{Range, Scale};
+//! use ploteria::version;
 //!
 //! fn tf(x: f64) -> Complex<f64> {
 //!     Complex::new(0., x) / Complex::new(10., x) / Complex::new(1., x / 10_000.)
 //! }
 //!
 //! # fn main() {
-//! # if let Err(_) = plot::version() {
+//! # if let Err(_) = version() {
 //! #     return;
 //! # }
 //! let (start, end): (f64, f64) = (1.1, 90_000.);
@@ -310,19 +305,17 @@
 //! ![Plot](filled_curve.svg)
 //!
 //! ```
-//! extern crate itertools_num;
-//! extern crate ploteria as plot;
-//!
 //! # use std::fs;
 //! # use std::path::Path;
 //! use std::f64::consts::PI;
 //! use std::iter;
 //!
 //! use itertools_num::linspace;
-//! use plot::prelude::*;
+//! use ploteria::prelude::*;
+//! use ploteria::{version, axis::Range};
 //!
 //! # fn main() {
-//! # if let Err(_) = plot::version() {
+//! # if let Err(_) = version() {
 //! #     return;
 //! # }
 //! let (start, end) = (-5., 5.);
@@ -386,8 +379,6 @@
 //! # }
 //! ```
 
-#![deny(missing_docs)]
-#![deny(warnings)]
 // This lint has lots of false positives ATM, see
 // https://github.com/Manishearth/rust-clippy/issues/761
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::new_without_default))]
@@ -403,18 +394,13 @@ use std::num::ParseIntError;
 use std::path::Path;
 use std::process::{Child, Command};
 use std::str;
-use std::{error::Error, default::Default};
+use std::{default::Default, error::Error};
 
 use crate::data::Matrix;
-use crate::traits::{Configure};
-use crate::map::axis::{Map, Properties};
-use crate::key::Properties as KeyProperties;
-use crate::axis::ScaleFactorTrait;
+use crate::{key::KeyProperties, map::axis::Map};
 mod data;
-mod display;
-mod map;
+pub mod map;
 use crate::axis::{Axes, Axis, AxisProperties};
-use crate::key::KeyProperties;
 
 pub mod axis;
 pub mod candlestick;
@@ -425,13 +411,11 @@ pub mod key;
 pub mod prelude;
 pub mod traits;
 
-
-
 /// Plot container
 #[derive(Clone)]
 pub struct Figure {
     alpha: Option<f64>,
-    axes: Map<Properties>,
+    axes: Map<AxisProperties>,
     box_width: Option<f64>,
     font: Option<Cow<'static, str>>,
     font_size: Option<f64>,
@@ -441,7 +425,7 @@ pub struct Figure {
     size: Option<(usize, usize)>,
     terminal: Terminal,
     tics: Map<String>,
-    title: Option<Cow<'static, str>>,
+    title: Option<&'static str>,
 }
 
 impl Figure {
@@ -469,14 +453,14 @@ impl Figure {
     /// # Panics
     ///
     /// Panics if `width` is a negative value
-    pub fn box_width(&mut self, width: f64) -> &mut Figure {
+    pub fn box_width(mut self, width: f64) -> Figure {
         assert!(width >= 0.);
 
         self.box_width = Some(width);
         self
     }
     /// Changes the font
-    pub fn font<S>(&mut self, font: S) -> &mut Figure
+    pub fn font<S>(mut self, font: S) -> Figure
     where
         S: Into<Cow<'static, str>>,
     {
@@ -488,7 +472,7 @@ impl Figure {
     /// # Panics
     ///
     /// Panics if `size` is a non-positive value
-    pub fn font_size(&mut self, size: f64) -> &mut Figure {
+    pub fn font_size(mut self, size: f64) -> Figure {
         assert!(size >= 0.);
 
         self.font_size = Some(size);
@@ -497,7 +481,7 @@ impl Figure {
     /// Changes the output file
     ///
     /// **Note** The default output file is `output.plot`
-    pub fn output<S>(&mut self, output: S) -> &mut Figure
+    pub fn output<S>(mut self, output: S) -> Figure
     where
         S: Into<Cow<'static, Path>>,
     {
@@ -505,23 +489,20 @@ impl Figure {
         self
     }
     /// Changes the figure size
-    pub fn figure_size(&mut self, width: usize, height: usize) -> &mut Figure {
+    pub fn figure_size(mut self, width: usize, height: usize) -> Figure {
         self.size = Some((width, height));
         self
     }
     /// Changes the output terminal
     ///
     /// **Note** By default, the terminal is set to `Svg`
-    pub fn terminal(&mut self, terminal: Terminal) -> &mut Figure {
+    pub fn terminal(mut self, terminal: Terminal) -> Figure {
         self.terminal = terminal;
         self
     }
     /// Sets the title
-    pub fn title<S>(&mut self, title: S) -> &mut Figure
-    where
-        S: Into<Cow<'static, str>>,
-    {
-        self.title = Some(title.into());
+    pub fn title(mut self, title: &'static str) -> Figure {
+        self.title = Some(title);
         self
     }
 
@@ -554,7 +535,8 @@ impl Figure {
             s.push_str(&format!("set style fill transparent solid {}\n", alpha))
         }
 
-        s.push_str(&format!("set terminal {} dashed", self.terminal.display()));
+        let terminal: &'static str = self.terminal.into();
+        s.push_str(&format!("set terminal {} dashed", terminal));
 
         if let Some((width, height)) = self.size {
             s.push_str(&format!(" size {}, {}", width, height))
@@ -651,34 +633,34 @@ impl Figure {
     }
 
     /// Configures an axis.
-    pub fn configure_axis<F: FnOnce(&mut AxisProperties) -> &mut AxisProperties>(
-        &mut self,
+    pub fn configure_axis<F: FnOnce(AxisProperties) -> AxisProperties>(
+        mut self,
         axis: Axis,
         configure: F,
-    ) -> &mut Figure {
+    ) -> Figure {
         if self.axes.contains_key(axis) {
-            configure(self.axes.get_mut(axis).unwrap());
+            configure(self.axes.get(axis).unwrap().to_owned());
         } else {
-            let mut properties = Default::default();
-            configure(&mut properties);
+            let properties = AxisProperties::default();
+            configure(properties.clone());
             self.axes.insert(axis, properties);
         }
         self
     }
 
     /// Configures the key (legend).
-    pub fn configure_key<F: FnOnce(&mut KeyProperties) -> &mut KeyProperties>(
-        &mut self,
+    pub fn configure_key<F: FnOnce(KeyProperties) -> KeyProperties>(
+        mut self,
         configure: F,
-    ) -> &mut Figure {
+    ) -> Figure {
         match self.key {
-            Some(ref mut key) => {
-                configure(key);
+            Some(ref key) => {
+                configure(key.to_owned());
             }
             None => {
-                let mut key = Default::default();
-                configure(&mut key);
-                self.key = Some(key);
+                let key: KeyProperties = Default::default();
+                self.key = Some(key.clone());
+                configure(key);
             }
         }
         self
@@ -711,8 +693,31 @@ pub enum Color {
     Yellow,
 }
 
+impl From<Color> for &'static str {
+    fn from(color: Color) -> Self {
+        match color {
+            Color::Black => "black",
+            Color::Blue => "blue",
+            Color::Cyan => "cyan",
+            Color::DarkViolet => "dark-violet",
+            Color::ForestGreen => "forest-green",
+            Color::Gold => "gold",
+            Color::Gray => "gray",
+            Color::Green => "green",
+            Color::Magenta => "magenta",
+            Color::Red => "red",
+            Color::Rgb(r, g, b) => {
+                let rgb = Box::new(format!("#{:02x}{:02x}{:02x}", r, g, b));
+                Box::leak(rgb)
+            }
+            Color::White => "white",
+            Color::Yellow => "yellow",
+        }
+    }
+}
+
 /// Grid line
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Grid {
     /// Major gridlines
     Major,
@@ -722,11 +727,9 @@ pub enum Grid {
 
 impl Grid {
     fn next(self) -> Option<Grid> {
-        use Grid::*;
-
         match self {
-            Major => Some(Minor),
-            Minor => None,
+            Grid::Major => Some(Grid::Minor),
+            Grid::Minor => None,
         }
     }
 }
@@ -750,6 +753,19 @@ impl Default for LineType {
     }
 }
 
+impl From<LineType> for &'static str {
+    fn from(line_type: LineType) -> Self {
+        match line_type {
+            LineType::Dash => "2",
+            LineType::Dot => "3",
+            LineType::DotDash => "4",
+            LineType::DotDotDash => "5",
+            LineType::SmallDot => "0",
+            LineType::Solid => "1",
+        }
+    }
+}
+
 /// Point type
 #[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
@@ -765,6 +781,21 @@ pub enum PointType {
     X,
 }
 
+impl From<PointType> for &'static str {
+    fn from(point_type: PointType) -> Self {
+        match point_type {
+            PointType::Circle => "6",
+            PointType::FilledCircle => "7",
+            PointType::FilledSquare => "5",
+            PointType::FilledTriangle => "9",
+            PointType::Plus => "1",
+            PointType::Square => "4",
+            PointType::Star => "3",
+            PointType::Triangle => "8",
+            PointType::X => "2",
+        }
+    }
+}
 /// Output terminal
 #[allow(missing_docs)]
 #[derive(Clone, Copy, Debug)]
@@ -772,24 +803,13 @@ pub enum Terminal {
     Svg,
 }
 
-/// Enums that can produce gnuplot code
-trait Display<S> {
-    /// Translates the enum in gnuplot code
-    fn display(&self) -> S;
+impl From<Terminal> for &'static str {
+    fn from(terminal: Terminal) -> Self {
+        match terminal {
+            Terminal::Svg => "svg dynamic",
+        }
+    }
 }
-
-/// Curve variant of Default
-trait CurveDefault<S> {
-    /// Creates `curve::Properties` with default configuration
-    fn default(S) -> Self;
-}
-
-/// Error bar variant of Default
-trait ErrorBarDefault<S> {
-    /// Creates `errorbar::Properties` with default configuration
-    fn default(S) -> Self;
-}
-
 /// Structs that can produce gnuplot code
 trait Script {
     /// Translates some configuration struct into gnuplot code
@@ -910,26 +930,25 @@ fn parse_version(version_str: &str) -> Result<Version, Option<ParseIntError>> {
     })
 }
 
-fn scale_factor(map: &map::axis::Map<AxisProperties>, axes: Axes) -> (f64, f64) {
-    use Axes::*;
-    use Axis::*;
-
+fn scale_factor(map: &Map<AxisProperties>, axes: Axes) -> (f64, f64) {
     match axes {
-        BottomXLeftY => (
-            map.get(BottomX).map_or(1., |props| props.scale_factor()),
-            map.get(LeftY).map_or(1., |props| props.scale_factor()),
+        Axes::BottomXLeftY => (
+            map.get(Axis::BottomX)
+                .map_or(1., |props| props.scale_factor),
+            map.get(Axis::LeftY).map_or(1., |props| props.scale_factor),
         ),
-        BottomXRightY => (
-            map.get(BottomX).map_or(1., |props| props.scale_factor()),
-            map.get(RightY).map_or(1., |props| props.scale_factor()),
+        Axes::BottomXRightY => (
+            map.get(Axis::BottomX)
+                .map_or(1., |props| props.scale_factor),
+            map.get(Axis::RightY).map_or(1., |props| props.scale_factor),
         ),
-        TopXLeftY => (
-            map.get(TopX).map_or(1., |props| props.scale_factor()),
-            map.get(LeftY).map_or(1., |props| props.scale_factor()),
+        Axes::TopXLeftY => (
+            map.get(Axis::TopX).map_or(1., |props| props.scale_factor),
+            map.get(Axis::LeftY).map_or(1., |props| props.scale_factor),
         ),
-        TopXRightY => (
-            map.get(TopX).map_or(1., |props| props.scale_factor()),
-            map.get(RightY).map_or(1., |props| props.scale_factor()),
+        Axes::TopXRightY => (
+            map.get(Axis::TopX).map_or(1., |props| props.scale_factor),
+            map.get(Axis::RightY).map_or(1., |props| props.scale_factor),
         ),
     }
 }

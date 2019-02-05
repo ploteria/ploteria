@@ -15,7 +15,8 @@ pub mod axis {
     }
 
     impl<'a, T> Iterator for Items<'a, T>
-    where T: Debug
+    where
+        T: Debug,
     {
         type Item = (Axis, &'a T);
 
@@ -36,7 +37,8 @@ pub mod axis {
     pub struct Map<T: Debug>([Option<T>; LENGTH]);
 
     impl<T> Default for Map<T>
-    where T: Debug
+    where
+        T: Debug,
     {
         fn default() -> Self {
             Self::new()
@@ -45,7 +47,7 @@ pub mod axis {
 
     impl<T> Map<T>
     where
-        T: Debug
+        T: Debug,
     {
         pub fn new() -> Map<T> {
             Map([None, None, None, None])
@@ -111,7 +113,8 @@ pub mod grid {
     }
 
     impl<'a, T> Iterator for Items<'a, T>
-    where T: Debug
+    where
+        T: Debug,
     {
         type Item = (Grid, &'a T);
 
@@ -175,7 +178,8 @@ pub mod grid {
     }
 
     impl<T> Default for Map<T>
-    where T: Debug
+    where
+        T: Debug,
     {
         fn default() -> Self {
             Self::new()

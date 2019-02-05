@@ -1,18 +1,19 @@
 //! "Candlestick" plots
 
-use std::borrow::Cow;
 use std::iter::IntoIterator;
-use std::{fmt::Debug, default::Default};
+use std::{default::Default, fmt::Debug};
 
-use data::Matrix;
-use traits::{self, Data, Set};
-use {Color, Default, Display, Figure, Label, LineType, LineWidth, Plot, Script};
+use itertools::izip;
+
+use crate::data::Matrix;
+use crate::traits::{Data, Plot as PlotTrait};
+use crate::{scale_factor, Axes, Color, Figure, LineType, Plot, Script};
 
 /// Properties common to candlestick plots
 #[derive(Debug, Default)]
 pub struct Properties {
     color: Option<Color>,
-    label: Option<Cow<'static, str>>,
+    label: Option<&'static str>,
     line_type: LineType,
     line_width: Option<f64>,
 }
@@ -24,8 +25,8 @@ impl Properties {
         self
     }
 
-    pub fn label(mut self, label: Label) -> Properties {
-        self.label = Some(label.0);
+    pub fn label(mut self, label: &'static str) -> Properties {
+        self.label = Some(label);
 
         self
     }
@@ -36,8 +37,8 @@ impl Properties {
         self
     }
 
-    pub fn line_width(mut self, line_width: LineWidth) -> Properties {
-        self.linewidth = line_width;
+    pub fn line_width(mut self, line_width: f64) -> Properties {
+        self.line_width = Some(line_width);
 
         self
     }
@@ -46,14 +47,15 @@ impl Properties {
 impl Script for Properties {
     fn script(&self) -> String {
         let mut script = String::from("with candlesticks ");
-        script.push_str(&format!("lt {} ", self.line_type.display()));
+        let line_type: &'static str = self.line_type.into();
+        script.push_str(&format!("lt {} ", line_type));
 
-        if let Some(lw) = self.linewidth {
+        if let Some(lw) = self.line_width {
             script.push_str(&format!("lw {} ", lw))
         }
 
         if let Some(color) = self.color {
-            script.push_str(&format!("lc rgb '{}' ", color.display()));
+            script.push_str(&format!("lc rgb '{}' ", Into::<&'static str>::into(color)));
         }
 
         if let Some(ref label) = self.label {
@@ -76,7 +78,7 @@ where
     WM: Debug,
     BM: Debug,
     BH: Debug,
-    WH: Debug
+    WH: Debug,
 {
     /// X coordinate of the candlestick
     pub x: X,
@@ -105,18 +107,14 @@ where
 {
     type Properties = Properties;
 
-    fn plot<F>(
-        &mut self,
-        candlesticks: Candlesticks<X, WM, BM, BH, WH>,
-        configure: F,
-    ) -> &mut Figure
+    fn plot<F>(mut self, candlesticks: Candlesticks<X, WM, BM, BH, WH>, configure: F) -> Figure
     where
-        F: FnOnce(&mut Properties) -> &mut Properties,
+        F: FnOnce(Properties) -> Properties,
         X: Debug,
         WM: Debug,
         BM: Debug,
         BH: Debug,
-        WH: Debug
+        WH: Debug,
     {
         let (x_factor, y_factor) = scale_factor(&self.axes, Axes::BottomXLeftY);
         let Candlesticks {
@@ -132,7 +130,7 @@ where
             (x_factor, y_factor, y_factor, y_factor, y_factor),
         );
         self.plots
-            .push(Plot::new(data, configure(&mut Default::default())));
+            .push(Plot::new(data, &configure(Default::default())));
         self
     }
 }

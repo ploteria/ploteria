@@ -1,20 +1,19 @@
 //! Filled curve plots
 
-use std::borrow::Cow;
-use std::iter::IntoIterator;
-use std::fmt::Debug;
 use itertools::izip;
+use std::fmt::Debug;
+use std::iter::IntoIterator;
 
 use crate::data::Matrix;
 use crate::traits::{Data, Plot as PlotTrait};
-use crate::{Axes, Color, Display, Figure, Label, Opacity, Plot, Script, scale_factor};
+use crate::{scale_factor, Axes, Color, Figure, Plot, Script};
 
 /// Properties common to filled curve plots
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Properties {
     axes: Option<Axes>,
     color: Option<Color>,
-    label: Option<Cow<'static, str>>,
+    label: Option<&'static str>,
     opacity: Option<f64>,
 }
 
@@ -22,23 +21,20 @@ impl Properties {
     /// Select axes to plot against
     ///
     /// **Note** By default, the `BottomXLeftY` axes are used
-    pub fn axes(&mut self, axes: Axes) -> &mut Properties {
+    pub fn axes(mut self, axes: Axes) -> Properties {
         self.axes = Some(axes);
         self
     }
 
     /// Sets the fill color
-    pub fn color(&mut self, color: Color) -> &mut Properties {
+    pub fn color(mut self, color: Color) -> Properties {
         self.color = Some(color);
         self
     }
 
     /// Sets the legend label
-    pub fn label<S>(&mut self, label: S) -> &mut Properties
-    where
-        S: Into<Cow<'static, str>>,
-    {
-        self.label = Some(label.into());
+    pub fn label(mut self, label: &'static str) -> Properties {
+        self.label = Some(label);
         self
     }
 
@@ -49,27 +45,16 @@ impl Properties {
     /// # Panics
     ///
     /// Panics if `opacity` is outside the range `[0, 1]`
-    pub fn opacity(&mut self, opacity: f64) -> &mut Properties {
+    pub fn opacity(mut self, opacity: f64) -> Properties {
         self.opacity = Some(opacity);
         self
-    }
-}
-
-impl Default for Properties {
-    fn default() -> Properties {
-        Properties {
-            axes: None,
-            color: None,
-            label: None,
-            opacity: None,
-        }
     }
 }
 
 impl Script for Properties {
     fn script(&self) -> String {
         let mut script = if let Some(axes) = self.axes {
-            format!("axes {} ", axes.display())
+            format!("axes {} ", Into::<&'static str>::into(axes))
         } else {
             String::new()
         };
@@ -85,7 +70,7 @@ impl Script for Properties {
         script.push_str("noborder ");
 
         if let Some(color) = self.color {
-            script.push_str(&format!("lc rgb '{}' ", color.display()));
+            script.push_str(&format!("lc rgb '{}' ", Into::<&'static str>::into(color)));
         }
 
         if let Some(ref label) = self.label {
@@ -106,7 +91,7 @@ pub struct FilledCurve<X, Y1, Y2>
 where
     X: Debug,
     Y1: Debug,
-    Y2: Debug
+    Y2: Debug,
 {
     /// X coordinate of the data points of both curves
     pub x: X,
@@ -127,14 +112,14 @@ where
 {
     type Properties = Properties;
 
-    fn plot<F>(&mut self, fc: FilledCurve<X, Y1, Y2>, configure: F) -> &mut Figure
+    fn plot<F>(mut self, fc: FilledCurve<X, Y1, Y2>, configure: F) -> Figure
     where
-        F: FnOnce(&mut Properties) -> &mut Properties,
+        F: FnOnce(Properties) -> Properties,
     {
         let FilledCurve { x, y1, y2 } = fc;
 
-        let mut props = Default::default();
-        configure(&mut props);
+        let props: Properties = Default::default();
+        configure(props.clone());
 
         let (x_factor, y_factor) =
             scale_factor(&self.axes, props.axes.unwrap_or(Axes::BottomXLeftY));

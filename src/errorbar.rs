@@ -1,15 +1,11 @@
 //! Error bar plots
 
-use std::borrow::Cow;
-use std::iter::IntoIterator;
 use std::fmt::Debug;
+use std::iter::IntoIterator;
 
 use crate::data::Matrix;
 use crate::traits::{Data, Plot as PlotTrait};
-use crate::{
-    Axes, Color, Display, ErrorBarDefault, Figure, Label, LineType, LineWidth, Plot, PointSize,
-    PointType, Script, scale_factor
-};
+use crate::{scale_factor, Axes, Color, Figure, LineType, Plot, PointType, Script};
 
 use itertools::izip;
 
@@ -17,7 +13,7 @@ use itertools::izip;
 #[derive(Clone, Debug)]
 pub struct Properties {
     color: Option<Color>,
-    label: Option<Cow<'static, str>>,
+    label: Option<&'static str>,
     line_type: LineType,
     linewidth: Option<f64>,
     point_size: Option<f64>,
@@ -27,24 +23,21 @@ pub struct Properties {
 
 impl Properties {
     /// Changes the color of the error bars
-    pub fn color(&mut self, color: Color) -> &mut Properties {
+    pub fn color(mut self, color: Color) -> Properties {
         self.color = Some(color);
         self
     }
 
     /// Sets the legend label
-    pub fn label<S>(&mut self, label: S) -> &mut Properties
-    where
-        S: Into<Cow<'static, str>>,
-    {
-        self.label = Some(label.into());
+    pub fn label(mut self, label: &'static str) -> Properties {
+        self.label = Some(label);
         self
     }
 
     /// Change the line type
     ///
     /// **Note** By default `Solid` lines are used
-    pub fn line_type(&mut self, lt: LineType) -> &mut Properties {
+    pub fn line_type(mut self, lt: LineType) -> Properties {
         self.line_type = lt;
         self
     }
@@ -54,7 +47,7 @@ impl Properties {
     /// # Panics
     ///
     /// Panics if `lw` is a non-positive value
-    pub fn line_width(&mut self, lw: f64) -> &mut Properties {
+    pub fn line_width(mut self, lw: f64) -> Properties {
         assert!(lw > 0.);
 
         self.linewidth = Some(lw);
@@ -66,7 +59,7 @@ impl Properties {
     /// # Panics
     ///
     /// Panics if `size` is a non-positive value
-    pub fn point_size(&mut self, ps: f64) -> &mut Properties {
+    pub fn point_size(mut self, ps: f64) -> Properties {
         assert!(ps > 0.);
 
         self.point_size = Some(ps);
@@ -74,14 +67,12 @@ impl Properties {
     }
 
     /// Changes the point type
-    pub fn point_type(&mut self, pt: PointType) -> &mut Properties {
+    pub fn point_type(mut self, pt: PointType) -> Properties {
         self.point_type = Some(pt);
         self
     }
-}
 
-impl ErrorBarDefault<Style> for Properties {
-    fn default(style: Style) -> Properties {
+    pub fn from_style(style: Style) -> Properties {
         Properties {
             color: None,
             label: None,
@@ -96,20 +87,23 @@ impl ErrorBarDefault<Style> for Properties {
 
 impl Script for Properties {
     fn script(&self) -> String {
-        let mut script = format!("with {} ", self.style.display());
+        let mut script = format!("with {} ", Into::<&'static str>::into(self.style));
 
-        script.push_str(&format!("lt {} ", self.line_type.display()));
+        script.push_str(&format!(
+            "lt {} ",
+            Into::<&'static str>::into(self.line_type)
+        ));
 
         if let Some(lw) = self.linewidth {
-            script.push_str(&format!("lw {} ", lw))
+            script.push_str(&format!("lw {} ", lw));
         }
 
         if let Some(color) = self.color {
-            script.push_str(&format!("lc rgb '{}' ", color.display()))
+            script.push_str(&format!("lc rgb '{}' ", Into::<&'static str>::into(color)));
         }
 
         if let Some(pt) = self.point_type {
-            script.push_str(&format!("pt {} ", pt.display()))
+            script.push_str(&format!("pt {} ", Into::<&'static str>::into(pt)));
         }
 
         if let Some(ps) = self.point_size {
@@ -128,18 +122,17 @@ impl Script for Properties {
     }
 }
 
-
 #[derive(Clone, Copy, Debug)]
-enum Style {
+pub enum Style {
     XErrorBars,
     XErrorLines,
     YErrorBars,
     YErrorLines,
 }
 
-impl Display<&'static str> for Style {
-    fn display(&self) -> &'static str {
-        match *self {
+impl From<Style> for &'static str {
+    fn from(style: Style) -> Self {
+        match style {
             Style::XErrorBars => "xerrorbars",
             Style::XErrorLines => "xerrorlines",
             Style::YErrorBars => "yerrorbars",
@@ -155,8 +148,7 @@ where
     X: Debug,
     Y: Debug,
     L: Debug,
-    H: Debug
-
+    H: Debug,
 {
     /// Horizontal error bars
     XErrorBars {
@@ -209,7 +201,7 @@ where
     X: Debug,
     Y: Debug,
     L: Debug,
-    H: Debug
+    H: Debug,
 {
     fn style(&self) -> Style {
         match *self {
@@ -234,9 +226,9 @@ where
 {
     type Properties = Properties;
 
-    fn plot<F>(&mut self, e: ErrorBar<X, Y, L, H>, configure: F) -> &mut Figure
+    fn plot<F>(mut self, e: ErrorBar<X, Y, L, H>, configure: F) -> Figure
     where
-        F: FnOnce(&mut Properties) -> &mut Properties,
+        F: FnOnce(Properties) -> Properties,
     {
         let (x_factor, y_factor) = scale_factor(&self.axes, Axes::BottomXLeftY);
 
@@ -271,10 +263,8 @@ where
             izip!(x, y, length, height),
             (x_factor, y_factor, e_factor, e_factor),
         );
-        self.plots.push(Plot::new(
-            data,
-            configure(&mut ErrorBarDefault::default(style)),
-        ));
+        self.plots
+            .push(Plot::new(data, &configure(Properties::from_style(style))));
         self
     }
 }
