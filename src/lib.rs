@@ -387,7 +387,6 @@
 //! ```
 
 #![deny(missing_docs)]
-#![deny(warnings)]
 // This lint has lots of false positives ATM, see
 // https://github.com/Manishearth/rust-clippy/issues/761
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::new_without_default))]
