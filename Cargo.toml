@@ -2,7 +2,7 @@
 authors = [
     "Jorge Aparicio <japaricious@gmail.com>",
     "Brook Heisler <brookheisler@gmail.com>",
-    "Lorinc",
+    "Lőrinc Serfőző <serfozo.lorinc@gmail.com>",
     "Alice Ryhl <alice@ryhl.io>",
     "Dylan DPC <dylan.dpc@gmail.com>"
     ]
@@ -25,7 +25,3 @@ itertools = "0.8"
 itertools-num = "0.1"
 num-complex = { version = "0.2", default-features = false, features = ["std"] }
 rand = "0.4"
-
-[badges]
-travis-ci = { repository = "bheisler/criterion.rs" }
-appveyor = { repository = "bheisler/criterion.rs", id = "4255ads9ctpupcl2" }
