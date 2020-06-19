@@ -394,11 +394,6 @@
 #![allow(clippy::doc_markdown)]
 #![allow(clippy::many_single_char_names)]
 
-extern crate byteorder;
-extern crate cast;
-#[macro_use]
-extern crate itertools;
-
 use std::borrow::Cow;
 use std::fmt;
 use std::fs::File;
@@ -408,7 +403,7 @@ use std::path::Path;
 use std::process::{Child, Command};
 use std::str;
 
-use data::Matrix;
+use crate::data::Matrix;
 
 mod data;
 mod display;
@@ -762,13 +757,13 @@ trait Display<S> {
 /// Curve variant of Default
 trait CurveDefault<S> {
     /// Creates `curve::Properties` with default configuration
-    fn default(S) -> Self;
+    fn default(_: S) -> Self;
 }
 
 /// Error bar variant of Default
 trait ErrorBarDefault<S> {
     /// Creates `errorbar::Properties` with default configuration
-    fn default(S) -> Self;
+    fn default(_: S) -> Self;
 }
 
 /// Structs that can produce gnuplot code
@@ -891,8 +886,8 @@ fn parse_version(version_str: &str) -> Result<Version, Option<ParseIntError>> {
 }
 
 fn scale_factor(map: &map::axis::Map<AxisProperties>, axes: Axes) -> (f64, f64) {
-    use Axes::*;
-    use Axis::*;
+    use crate::Axes::*;
+    use crate::Axis::*;
 
     match axes {
         BottomXLeftY => (

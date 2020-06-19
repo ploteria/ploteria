@@ -6,8 +6,8 @@ pub use self::grid::Gridline;
 use std::borrow::Cow;
 use std::iter::IntoIterator;
 
-use traits::Data;
-use {Default, Display, Script};
+use crate::traits::Data;
+use crate::{Default, Display, Script};
 
 /// A coordinate axis
 #[derive(Clone, Copy)]
@@ -24,7 +24,7 @@ pub enum Axis {
 
 impl Axis {
     pub(crate) fn next(self) -> Option<Axis> {
-        use Axis::*;
+        use crate::Axis::*;
 
         match self {
             BottomX => Some(LeftY),
@@ -256,7 +256,7 @@ impl<'a> Script for (Axis, &'a AxisProperties) {
     }
 }
 
-impl ::ScaleFactorTrait for AxisProperties {
+impl crate::ScaleFactorTrait for AxisProperties {
     fn scale_factor(&self) -> f64 {
         self.scale_factor
     }

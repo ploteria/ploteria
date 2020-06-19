@@ -1,6 +1,6 @@
 //! Gridline
 
-use {Axis, Display, Script};
+use crate::{Axis, Display, Script};
 
 /// Gridline properties.
 ///

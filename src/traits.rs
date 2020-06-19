@@ -12,7 +12,7 @@ pub trait Plot<This> {
     type Properties;
 
     /// Plots some `data` with some `configuration`
-    fn plot<F>(&mut self, This, F) -> &mut Self
+    fn plot<F>(&mut self, _: This, _: F) -> &mut Self
     where
         F: FnOnce(&mut Self::Properties) -> &mut Self::Properties;
 }

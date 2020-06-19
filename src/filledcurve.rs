@@ -1,11 +1,12 @@
 //! Filled curve plots
 
+use itertools::izip;
 use std::borrow::Cow;
 use std::iter::IntoIterator;
 
-use data::Matrix;
-use traits::{self, Data};
-use {Axes, Color, Default, Display, Figure, Plot, Script};
+use crate::data::Matrix;
+use crate::traits::{self, Data};
+use crate::{Axes, Color, Default, Display, Figure, Plot, Script};
 
 /// Properties common to filled curve plots
 pub struct Properties {
@@ -128,7 +129,7 @@ where
         configure(&mut props);
 
         let (x_factor, y_factor) =
-            ::scale_factor(&self.axes, props.axes.unwrap_or(::Axes::BottomXLeftY));
+            crate::scale_factor(&self.axes, props.axes.unwrap_or(crate::Axes::BottomXLeftY));
 
         let data = Matrix::new(izip!(x, y1, y2), (x_factor, y_factor, y_factor));
         self.plots.push(Plot::new(data, &props));
