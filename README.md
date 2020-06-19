@@ -1,5 +1,7 @@
 # `ploteria`
 
+![Continuous integration](https://github.com/ploteria/ploteria/workflows/Continuous%20integration/badge.svg)
+
 This crate allows you to easily crate complex plots and graphs. Internally this crate uses
 [gnuplot] to perform the actual plotting.
 
