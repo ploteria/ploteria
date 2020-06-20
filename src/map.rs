@@ -1,7 +1,7 @@
 //! Enum Maps
 
 pub mod axis {
-    use Axis;
+    use crate::Axis;
 
     const LENGTH: usize = 4;
 

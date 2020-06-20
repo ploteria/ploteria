@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use {Default, Display, Script};
+use crate::{Default, Display, Script};
 
 /// Properties of the key.
 ///
