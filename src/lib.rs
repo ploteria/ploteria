@@ -523,6 +523,8 @@ impl Figure {
     fn script(&self) -> Vec<u8> {
         let mut s = String::new();
 
+        s.push_str("set encoding utf8\n");
+
         s.push_str(&format!("set output '{}'\n", self.output.display()));
 
         if let Some(width) = self.box_width {
