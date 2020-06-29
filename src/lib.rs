@@ -267,8 +267,12 @@
 //! #   .output(Path::new("target/doc/ploteria/multiaxis.svg"))
 //! #   .figure_size(1280, 720)
 //!     .title("Frequency response")
+//!     .configure_grid(|g| g
+//!         .layer(GridLayer::Front)
+//!         .configure_major(|mg| mg
+//!             .line_width(2.0)))
 //!     .configure_axis(Axis::BottomX, |a| a
-//!         .configure_major_grid(|g| g.show())
+//!         .major_grid()
 //!         .label("Angular frequency (rad/s)")
 //!         .range(Range::Limits(start, end))
 //!         .scale(Scale::Logarithmic))
@@ -276,7 +280,6 @@
 //!         .label("Gain")
 //!         .scale(Scale::Logarithmic))
 //!     .configure_axis(Axis::RightY, |a| a
-//!         .configure_major_grid(|g| g.show())
 //!         .label("Phase shift (°)"))
 //!     .configure_key(|k| k
 //!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
@@ -407,6 +410,7 @@ use crate::data::Matrix;
 
 mod data;
 mod display;
+mod grid;
 mod map;
 
 pub mod axis;
@@ -419,6 +423,7 @@ pub mod prelude;
 pub mod traits;
 
 use axis::{Axes, Axis, AxisProperties};
+use grid::GridOptions;
 use key::KeyProperties;
 
 /// Plot container
@@ -436,6 +441,7 @@ pub struct Figure {
     terminal: Terminal,
     tics: map::axis::Map<String>,
     title: Option<Cow<'static, str>>,
+    grid: Option<GridOptions>,
 }
 
 impl Figure {
@@ -454,6 +460,7 @@ impl Figure {
             terminal: Terminal::Svg,
             tics: map::axis::Map::new(),
             title: None,
+            grid: None,
         }
     }
 
@@ -545,6 +552,10 @@ impl Figure {
 
         if let Some(ref key) = self.key {
             s.push_str(&key.script())
+        }
+
+        if let Some(ref grid_options) = self.grid {
+            s.push_str(&grid_options.script());
         }
 
         if let Some(alpha) = self.alpha {
@@ -676,6 +687,24 @@ impl Figure {
                 let mut key = Default::default();
                 configure(&mut key);
                 self.key = Some(key);
+            }
+        }
+        self
+    }
+
+    /// Configures the major and the minor grid
+    pub fn configure_grid<F: FnOnce(&mut GridOptions) -> &mut GridOptions>(
+        &mut self,
+        configure: F,
+    ) -> &mut Figure {
+        match self.grid {
+            Some(ref mut grid) => {
+                configure(grid);
+            }
+            None => {
+                let mut grid = Default::default();
+                configure(&mut grid);
+                self.grid = Some(grid);
             }
         }
         self

@@ -1,8 +1,5 @@
 //! Coordinate axis
 
-mod grid;
-pub use self::grid::Gridline;
-
 use std::borrow::Cow;
 use std::iter::IntoIterator;
 
@@ -85,8 +82,8 @@ pub struct TicLabels<P, L> {
 /// [`configure_axis`]: ../struct.Figure.html#method.configure_axis
 #[derive(Clone)]
 pub struct AxisProperties {
-    major_grid: Gridline,
-    minor_grid: Gridline,
+    major_grid: bool,
+    minor_grid: bool,
     hidden: bool,
     label: Option<Cow<'static, str>>,
     logarithmic: bool,
@@ -98,8 +95,8 @@ pub struct AxisProperties {
 impl Default for AxisProperties {
     fn default() -> AxisProperties {
         AxisProperties {
-            major_grid: Gridline::new(false),
-            minor_grid: Gridline::new(true),
+            major_grid: false,
+            minor_grid: false,
             hidden: false,
             label: None,
             logarithmic: false,
@@ -201,21 +198,15 @@ impl AxisProperties {
         self
     }
 
-    /// Configure the major grid. These grid lines are places on the major tic marks.
-    pub fn configure_major_grid<F: FnOnce(&mut Gridline) -> &mut Gridline>(
-        &mut self,
-        configure: F,
-    ) -> &mut AxisProperties {
-        configure(&mut self.major_grid);
+    /// Enables the major grid. These grid lines are places on the major tic marks.
+    pub fn major_grid(&mut self) -> &mut AxisProperties {
+        self.major_grid = true;
         self
     }
 
-    /// Configure the minor grid. These grid lines are places on the minor tic marks.
-    pub fn configure_minor_grid<F: FnOnce(&mut Gridline) -> &mut Gridline>(
-        &mut self,
-        configure: F,
-    ) -> &mut AxisProperties {
-        configure(&mut self.minor_grid);
+    /// Enables the minor grid. These grid lines are places on the minor tic marks.
+    pub fn minor_grid(&mut self) -> &mut AxisProperties {
+        self.minor_grid = true;
         self
     }
 }
@@ -249,8 +240,13 @@ impl<'a> Script for (Axis, &'a AxisProperties) {
             script.push_str(&format!("set logscale {}\n", axis_));
         }
 
-        script.push_str(&(axis, &properties.major_grid).script());
-        script.push_str(&(axis, &properties.minor_grid).script());
+        if properties.major_grid {
+            script.push_str(&format!("set grid {}tics\n", axis_))
+        }
+
+        if properties.minor_grid {
+            script.push_str(&format!("set grid m{}tics\n", axis_))
+        }
 
         script
     }
