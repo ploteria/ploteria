@@ -1,18 +1,25 @@
+//! Grid along major and minor ticks
+
 use crate::{Default, Display, Script};
 
+/// The sorting layer of the gridlines
 #[derive(Clone, Copy)]
-#[allow(missing_docs)]
 pub enum GridLayer {
+    /// Default sorting layer (Back)
     Default,
+    /// The gridlines are rendered in front of the plot
     Front,
+    /// The gridlines are rendered behind the plot
     Back,
 }
 
+/// The appearence of the major or the minor gridlines
 #[derive(Clone, Copy)]
 pub struct GridStyle {
     line_width: Option<f64>,
 }
 
+/// The common options of the grid of the plot
 #[derive(Clone, Copy)]
 pub struct GridOptions {
     layer: Option<GridLayer>,
@@ -31,6 +38,7 @@ impl Display<&'static str> for GridLayer {
 }
 
 impl GridStyle {
+    /// Sets the line width of the grid
     pub fn line_width(&mut self, width: f64) -> &mut Self {
         self.line_width = Some(width);
         self
@@ -48,11 +56,13 @@ impl<'a> Script for &'a GridStyle {
 }
 
 impl GridOptions {
+    /// Sets the sorting layer of both the major and minor gridlines
     pub fn layer(&mut self, layer: GridLayer) -> &mut Self {
         self.layer = Some(layer);
         self
     }
 
+    /// Configure the major gridlines' style
     pub fn configure_major<F: FnOnce(&mut GridStyle) -> &mut GridStyle>(
         &mut self,
         configure: F,
@@ -61,6 +71,7 @@ impl GridOptions {
         self
     }
 
+    /// Configure the minor gridlines' style
     pub fn configure_minor<F: FnOnce(&mut GridStyle) -> &mut GridStyle>(
         &mut self,
         configure: F,

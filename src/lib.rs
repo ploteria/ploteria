@@ -410,7 +410,6 @@ use crate::data::Matrix;
 
 mod data;
 mod display;
-mod grid;
 mod map;
 
 pub mod axis;
@@ -418,6 +417,7 @@ pub mod candlestick;
 pub mod curve;
 pub mod errorbar;
 pub mod filledcurve;
+pub mod grid;
 pub mod key;
 pub mod prelude;
 pub mod traits;
