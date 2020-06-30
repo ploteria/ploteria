@@ -269,10 +269,15 @@
 //!     .title("Frequency response")
 //!     .configure_grid(|g| g
 //!         .layer(GridLayer::Front)
-//!         .configure_major(|mg| mg
-//!             .line_width(2.0)))
+//!         .configure_major(|g| g
+//!             .line_width(2.0))
+//!         .configure_minor(|g| g
+//!             .line_width(0.05)
+//!             .color(Color::Blue)
+//!             .line_type(LineType::Solid)))
 //!     .configure_axis(Axis::BottomX, |a| a
 //!         .major_grid()
+//!         .minor_grid()
 //!         .label("Angular frequency (rad/s)")
 //!         .range(Range::Limits(start, end))
 //!         .scale(Scale::Logarithmic))
@@ -280,7 +285,8 @@
 //!         .label("Gain")
 //!         .scale(Scale::Logarithmic))
 //!     .configure_axis(Axis::RightY, |a| a
-//!         .label("Phase shift (°)"))
+//!         .label("Phase shift (°)")
+//!         .major_grid())
 //!     .configure_key(|k| k
 //!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
 //!         .title(" "))

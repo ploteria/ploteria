@@ -1,6 +1,6 @@
 //! Grid along major and minor ticks
 
-use crate::{Default, Display, Script};
+use crate::{Color, Default, Display, LineType, Script};
 
 /// The sorting layer of the gridlines
 #[derive(Clone, Copy)]
@@ -17,6 +17,8 @@ pub enum GridLayer {
 #[derive(Clone, Copy)]
 pub struct GridStyle {
     line_width: Option<f64>,
+    color: Option<Color>,
+    line_type: Option<LineType>,
 }
 
 /// The common options of the grid of the plot
@@ -43,6 +45,18 @@ impl GridStyle {
         self.line_width = Some(width);
         self
     }
+
+    /// Sets the color of the grid
+    pub fn color(&mut self, color: Color) -> &mut Self {
+        self.color = Some(color);
+        self
+    }
+
+    /// Sets the line type of the grid
+    pub fn line_type(&mut self, line_type: LineType) -> &mut Self {
+        self.line_type = Some(line_type);
+        self
+    }
 }
 
 impl<'a> Script for &'a GridStyle {
@@ -50,6 +64,12 @@ impl<'a> Script for &'a GridStyle {
         let mut script = String::new();
         if let Some(line_width) = self.line_width {
             script.push_str(&format!("lw {} ", line_width));
+        }
+        if let Some(color) = self.color {
+            script.push_str(&format!("lc rgb '{}' ", color.display()));
+        }
+        if let Some(line_type) = self.line_type {
+            script.push_str(&format!("lt {} ", line_type.display()))
         }
         script
     }
@@ -85,8 +105,16 @@ impl Default for GridOptions {
     fn default() -> Self {
         GridOptions {
             layer: None,
-            major_style: GridStyle { line_width: None },
-            minor_style: GridStyle { line_width: None },
+            major_style: GridStyle {
+                line_width: None,
+                color: None,
+                line_type: None,
+            },
+            minor_style: GridStyle {
+                line_width: None,
+                color: None,
+                line_type: None,
+            },
         }
     }
 }
