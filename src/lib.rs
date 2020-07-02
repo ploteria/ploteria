@@ -276,8 +276,8 @@
 //!             .color(Color::Blue)
 //!             .line_type(LineType::Solid)))
 //!     .configure_axis(Axis::BottomX, |a| a
-//!         .major_grid()
-//!         .minor_grid()
+//!         .major_grid(true)
+//!         .minor_grid(true)
 //!         .label("Angular frequency (rad/s)")
 //!         .range(Range::Limits(start, end))
 //!         .scale(Scale::Logarithmic))
@@ -286,7 +286,7 @@
 //!         .scale(Scale::Logarithmic))
 //!     .configure_axis(Axis::RightY, |a| a
 //!         .label("Phase shift (°)")
-//!         .major_grid())
+//!         .major_grid(true))
 //!     .configure_key(|k| k
 //!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
 //!         .title(" "))

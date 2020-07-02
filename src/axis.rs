@@ -199,14 +199,14 @@ impl AxisProperties {
     }
 
     /// Enables the major grid. These grid lines are places on the major tic marks.
-    pub fn major_grid(&mut self) -> &mut AxisProperties {
-        self.major_grid = true;
+    pub fn major_grid(&mut self, enabled: bool) -> &mut AxisProperties {
+        self.major_grid = enabled;
         self
     }
 
     /// Enables the minor grid. These grid lines are places on the minor tic marks.
-    pub fn minor_grid(&mut self) -> &mut AxisProperties {
-        self.minor_grid = true;
+    pub fn minor_grid(&mut self, enabled: bool) -> &mut AxisProperties {
+        self.minor_grid = enabled;
         self
     }
 }
