@@ -5,8 +5,6 @@ use crate::{Color, Default, Display, LineType, Script};
 /// The sorting layer of the gridlines
 #[derive(Clone, Copy)]
 pub enum GridLayer {
-    /// Default sorting layer (Back)
-    Default,
     /// The gridlines are rendered in front of the plot
     Front,
     /// The gridlines are rendered behind the plot
@@ -32,7 +30,6 @@ pub struct GridOptions {
 impl Display<&'static str> for GridLayer {
     fn display(&self) -> &'static str {
         match self {
-            GridLayer::Default => "layerdefault",
             GridLayer::Front => "front",
             GridLayer::Back => "back",
         }
