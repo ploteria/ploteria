@@ -665,11 +665,10 @@ impl Figure {
     }
 
     /// Configures an axis.
-    pub fn configure_axis<F: FnOnce(&mut AxisProperties) -> &mut AxisProperties>(
-        &mut self,
-        axis: Axis,
-        configure: F,
-    ) -> &mut Figure {
+    pub fn configure_axis<F>(&mut self, axis: Axis, configure: F) -> &mut Figure
+    where
+        F: (FnOnce(&mut AxisProperties) -> &mut AxisProperties),
+    {
         if self.axes.contains_key(axis) {
             configure(self.axes.get_mut(axis).unwrap());
         } else {
@@ -681,10 +680,10 @@ impl Figure {
     }
 
     /// Configures the key (legend).
-    pub fn configure_key<F: FnOnce(&mut KeyProperties) -> &mut KeyProperties>(
-        &mut self,
-        configure: F,
-    ) -> &mut Figure {
+    pub fn configure_key<F>(&mut self, configure: F) -> &mut Figure
+    where
+        F: FnOnce(&mut KeyProperties) -> &mut KeyProperties,
+    {
         match self.key {
             Some(ref mut key) => {
                 configure(key);
@@ -699,10 +698,10 @@ impl Figure {
     }
 
     /// Configures the major and the minor grid
-    pub fn configure_grid<F: FnOnce(&mut GridOptions) -> &mut GridOptions>(
-        &mut self,
-        configure: F,
-    ) -> &mut Figure {
+    pub fn configure_grid<F>(&mut self, configure: F) -> &mut Figure
+    where
+        F: FnOnce(&mut GridOptions) -> &mut GridOptions,
+    {
         match self.grid {
             Some(ref mut grid) => {
                 configure(grid);

@@ -80,19 +80,19 @@ impl GridOptions {
     }
 
     /// Configure the major gridlines' style
-    pub fn configure_major<F: FnOnce(&mut GridStyle) -> &mut GridStyle>(
-        &mut self,
-        configure: F,
-    ) -> &mut Self {
+    pub fn configure_major<F>(&mut self, configure: F) -> &mut Self
+    where
+        F: FnOnce(&mut GridStyle) -> &mut GridStyle,
+    {
         configure(&mut self.major_style);
         self
     }
 
     /// Configure the minor gridlines' style
-    pub fn configure_minor<F: FnOnce(&mut GridStyle) -> &mut GridStyle>(
-        &mut self,
-        configure: F,
-    ) -> &mut Self {
+    pub fn configure_minor<F>(&mut self, configure: F) -> &mut Self
+    where
+        F: FnOnce(&mut GridStyle) -> &mut GridStyle,
+    {
         configure(&mut self.minor_style);
         self
     }
