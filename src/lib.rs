@@ -267,8 +267,17 @@
 //! #   .output(Path::new("target/doc/ploteria/multiaxis.svg"))
 //! #   .figure_size(1280, 720)
 //!     .title("Frequency response")
+//!     .configure_grid(|g| g
+//!         .layer(GridLayer::Front)
+//!         .configure_major(|g| g
+//!             .line_width(2.0))
+//!         .configure_minor(|g| g
+//!             .line_width(0.05)
+//!             .color(Color::Blue)
+//!             .line_type(LineType::Solid)))
 //!     .configure_axis(Axis::BottomX, |a| a
-//!         .configure_major_grid(|g| g.show())
+//!         .major_grid(true)
+//!         .minor_grid(true)
 //!         .label("Angular frequency (rad/s)")
 //!         .range(Range::Limits(start, end))
 //!         .scale(Scale::Logarithmic))
@@ -276,8 +285,8 @@
 //!         .label("Gain")
 //!         .scale(Scale::Logarithmic))
 //!     .configure_axis(Axis::RightY, |a| a
-//!         .configure_major_grid(|g| g.show())
-//!         .label("Phase shift (°)"))
+//!         .label("Phase shift (°)")
+//!         .major_grid(true))
 //!     .configure_key(|k| k
 //!         .position(Position::Inside(Vertical::Top, Horizontal::Center))
 //!         .title(" "))
@@ -414,11 +423,13 @@ pub mod candlestick;
 pub mod curve;
 pub mod errorbar;
 pub mod filledcurve;
+pub mod grid;
 pub mod key;
 pub mod prelude;
 pub mod traits;
 
 use axis::{Axes, Axis, AxisProperties};
+use grid::GridOptions;
 use key::KeyProperties;
 
 /// Plot container
@@ -436,6 +447,7 @@ pub struct Figure {
     terminal: Terminal,
     tics: map::axis::Map<String>,
     title: Option<Cow<'static, str>>,
+    grid: Option<GridOptions>,
 }
 
 impl Figure {
@@ -454,6 +466,7 @@ impl Figure {
             terminal: Terminal::Svg,
             tics: map::axis::Map::new(),
             title: None,
+            grid: None,
         }
     }
 
@@ -545,6 +558,10 @@ impl Figure {
 
         if let Some(ref key) = self.key {
             s.push_str(&key.script())
+        }
+
+        if let Some(ref grid_options) = self.grid {
+            s.push_str(&grid_options.script());
         }
 
         if let Some(alpha) = self.alpha {
@@ -648,11 +665,10 @@ impl Figure {
     }
 
     /// Configures an axis.
-    pub fn configure_axis<F: FnOnce(&mut AxisProperties) -> &mut AxisProperties>(
-        &mut self,
-        axis: Axis,
-        configure: F,
-    ) -> &mut Figure {
+    pub fn configure_axis<F>(&mut self, axis: Axis, configure: F) -> &mut Figure
+    where
+        F: (FnOnce(&mut AxisProperties) -> &mut AxisProperties),
+    {
         if self.axes.contains_key(axis) {
             configure(self.axes.get_mut(axis).unwrap());
         } else {
@@ -664,10 +680,10 @@ impl Figure {
     }
 
     /// Configures the key (legend).
-    pub fn configure_key<F: FnOnce(&mut KeyProperties) -> &mut KeyProperties>(
-        &mut self,
-        configure: F,
-    ) -> &mut Figure {
+    pub fn configure_key<F>(&mut self, configure: F) -> &mut Figure
+    where
+        F: FnOnce(&mut KeyProperties) -> &mut KeyProperties,
+    {
         match self.key {
             Some(ref mut key) => {
                 configure(key);
@@ -676,6 +692,24 @@ impl Figure {
                 let mut key = Default::default();
                 configure(&mut key);
                 self.key = Some(key);
+            }
+        }
+        self
+    }
+
+    /// Configures the major and the minor grid
+    pub fn configure_grid<F>(&mut self, configure: F) -> &mut Figure
+    where
+        F: FnOnce(&mut GridOptions) -> &mut GridOptions,
+    {
+        match self.grid {
+            Some(ref mut grid) => {
+                configure(grid);
+            }
+            None => {
+                let mut grid = Default::default();
+                configure(&mut grid);
+                self.grid = Some(grid);
             }
         }
         self
